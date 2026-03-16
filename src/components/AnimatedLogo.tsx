@@ -1,5 +1,5 @@
 import React from 'react';
-import { motion } from 'framer-motion';
+import { motion, type Variants } from 'framer-motion';
 
 interface AnimatedLogoProps {
   isThinking?: boolean;
@@ -13,7 +13,7 @@ const AnimatedLogo: React.FC<AnimatedLogoProps> = ({
   className = ""
 }) => {
   // Container rotation animation
-  const containerVariants = {
+  const containerVariants: Variants = {
     thinking: {
       rotate: 360,
       transition: {
@@ -26,7 +26,7 @@ const AnimatedLogo: React.FC<AnimatedLogoProps> = ({
   };
 
   // Node and Bond "in and out" animation
-  const nodeVariants = {
+  const nodeVariants: Variants = {
     thinking: {
       scale: [1, 1.1, 1],
       transition: {
@@ -39,7 +39,7 @@ const AnimatedLogo: React.FC<AnimatedLogoProps> = ({
   };
 
   // Individual node offsets to create a more organic feel
-  const node2Variants = {
+  const node2Variants: Variants = {
     thinking: {
       scale: [1, 1.15, 1],
       transition: {
@@ -52,7 +52,7 @@ const AnimatedLogo: React.FC<AnimatedLogoProps> = ({
     static: { scale: 1 }
   };
 
-  const node3Variants = {
+  const node3Variants: Variants = {
     thinking: {
       scale: [1, 1.05, 1],
       transition: {
