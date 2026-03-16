@@ -15,7 +15,7 @@ const WelcomeScreen: React.FC<WelcomeProps> = ({ mode, onModeChange }) => {
   const [showModes, setShowModes] = React.useState(false);
 
   return (
-  <div className="welcome-screen" style={{ justifyContent: 'flex-start', paddingTop: '10vh' }}>
+  <div className="welcome-screen">
     <motion.div 
       className="welcome-logo"
       initial={{ scale: 0 }}

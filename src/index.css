@@ -171,7 +171,7 @@ body {
   top: calc(100% + 15px);
   left: 50%;
   transform: translateX(-50%);
-  width: 500px;
+  width: min(500px, 90vw);
   background: rgba(15, 15, 18, 0.95);
   backdrop-filter: blur(25px);
   border: 1px solid rgba(255, 255, 255, 0.1);
@@ -583,7 +583,7 @@ body {
   font-size: 13px;
   font-weight: 500;
   color: var(--text-secondary);
-  margin-bottom: 28px;
+  margin-bottom: 24px;
 }
 
 .suggestions-grid {
@@ -929,7 +929,7 @@ body {
   position: absolute;
   bottom: calc(100% + 12px);
   right: 0;
-  width: 280px;
+  width: min(280px, 85vw);
   background: rgba(18, 18, 20, 0.95);
   backdrop-filter: blur(20px);
   border: 1px solid rgba(255, 255, 255, 0.1);
@@ -1563,11 +1563,114 @@ body {
   to { opacity: 1; transform: translateX(-50%) translateY(0); }
 }
 
-/* Responsive */
-@media (max-width: 640px) {
-  .sidebar { display: none; }
-  .suggestions-grid { grid-template-columns: 1fr; }
-  .message-bubble.user { max-width: 90%; }
-  .settings-panel { width: 100%; }
-  .modal-card { padding: 24px; }
+/* Responsive Overhaul */
+@media (max-width: 768px) {
+  .topbar {
+    padding: 0 12px;
+  }
+  
+  .topbar-right {
+    gap: 8px;
+  }
+
+  .welcome-screen {
+    padding: 40px 20px;
+    justify-content: center !important;
+    padding-top: 0 !important;
+  }
+
+  .welcome-logo {
+    width: 60px;
+    height: 60px;
+    margin-bottom: 20px;
+  }
+
+  .welcome-title {
+    font-size: 22px;
+  }
+
+  .welcome-subtitle {
+    font-size: 13px;
+    margin-bottom: 24px;
+    padding: 0 10px;
+  }
+
+  .welcome-mode-highlight {
+    font-size: 12px;
+    padding: 6px 12px;
+  }
+
+  .dropdown-grid {
+    grid-template-columns: 1fr;
+    max-height: 40vh;
+    overflow-y: auto;
+  }
+
+  .welcome-mode-dropdown {
+    padding: 16px;
+    border-radius: 20px;
+  }
+
+  .input-area.centered {
+    top: auto;
+    bottom: 20px;
+    transform: translateX(-50%);
+    padding: 0 16px;
+    gap: 16px;
+  }
+
+  .input-area.centered .input-container {
+    max-width: 100%;
+  }
+
+  .landed-suggestions {
+    margin-top: 12px;
+    min-height: auto;
+    gap: 8px;
+  }
+
+  .landed-suggestion-btn {
+    font-size: 12px;
+    padding: 6px 12px;
+  }
+
+  .message-wrapper {
+    gap: 10px;
+    padding: 0 10px;
+  }
+
+  .message-bubble {
+    font-size: 14px;
+    padding: 12px 14px;
+  }
+
+  .message-avatar {
+    width: 30px;
+    height: 30px;
+    min-width: 30px;
+  }
+
+  .chat-area {
+    padding: 16px 12px;
+  }
+
+  .model-dropdown-popover {
+    right: -10px;
+    width: 260px;
+  }
+}
+
+@media (max-width: 480px) {
+  .welcome-title {
+    font-size: 18px;
+  }
+  
+  .topbar-mode-badge span {
+    display: none;
+  }
+  
+  .topbar-model-badge {
+    font-size: 10px;
+    padding: 3px 6px;
+  }
 }
