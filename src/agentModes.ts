@@ -1,4 +1,38 @@
 import type { AgentModeConfig } from './types';
+import { INNOVESTOR_KNOWLEDGE, STARTUP_UNICORN_ROADMAP } from './knowledge';
+
+const INNOVESTOR_CONTEXT = `
+# ABOUT INNOVESTOR
+Innovestor is an early-stage discovery and credibility platform founded in 2025 in Visakhapatnam, India by Eswar Orsu (Founder) and Chepuri Natraj (Co-Founder).
+Official Website: ${INNOVESTOR_KNOWLEDGE.company.website}
+
+## Mission & Vision
+- Mission: ${INNOVESTOR_KNOWLEDGE.company.mission}
+- Vision: ${INNOVESTOR_KNOWLEDGE.company.vision}
+
+## Platform Philosophy
+${INNOVESTOR_KNOWLEDGE.platform_philosophy.map(p => `- **${p.principle}**: ${p.description}`).join('\n')}
+
+## Core Concept: Execution-Based Credibility
+Instead of pitch-based evaluation, Innovestor focuses on "Execution Signals":
+${INNOVESTOR_KNOWLEDGE.core_concept.execution_signals.map(s => `- ${s}`).join('\n')}
+
+## Differentiation
+- Execution-based signals vs. static pitch decks
+- Intelligence layer before transaction layer
+- Early-stage discovery before traditional VCs/accelerators
+
+## Startup Growth Roadmap (A to Z)
+The journey from Idea to Unicorn ($1B+) as supported by Innovestor:
+${STARTUP_UNICORN_ROADMAP.map((r: any) => `${r.stage}: ${r.description} (Innovestor role: ${r.innovestor_role})`).join('\n')}
+
+## Platform Workflow
+${INNOVESTOR_KNOWLEDGE.platform_workflow.join('\n')}
+
+## Target Users
+- Founders: ${INNOVESTOR_KNOWLEDGE.target_users.founders.join(', ')}
+- Investors: ${INNOVESTOR_KNOWLEDGE.target_users.investors.join(', ')}
+`;
 
 export const AGENT_MODES: AgentModeConfig[] = [
   {
@@ -8,6 +42,8 @@ export const AGENT_MODES: AgentModeConfig[] = [
     description: 'Your all-purpose startup & investment AI assistant',
     color: '#6366f1',
     systemPrompt: `You are INNOVESTOR COPILOT, an elite AI assistant specializing in startups, venture capital, entrepreneurship, and investment strategy. You are embedded in the Innovestor platform — a marketplace connecting founders and investors.
+
+${INNOVESTOR_CONTEXT}
 
 Your role:
 - Help founders craft compelling pitches, validate ideas, and navigate fundraising
@@ -23,10 +59,10 @@ Always be:
 
 Format responses with markdown for clarity. Use bullet points, headers, and bold text appropriately.`,
     suggestedPrompts: [
-      'How do I prepare for a Series A fundraise?',
-      'What makes a great startup pitch deck?',
-      'Explain a SAFE note vs convertible note',
-      'What should I look for when evaluating a startup?',
+      'How does Innovestor verify founder credibility?',
+      'What are execution signals?',
+      'Walk me through the A to Z startup growth roadmap',
+      'How do I use my weekly updates to attract investors?',
     ],
   },
   {
@@ -36,6 +72,8 @@ Format responses with markdown for clarity. Use bullet points, headers, and bold
     description: 'Perfect your pitch deck and investor presentation',
     color: '#f59e0b',
     systemPrompt: `You are INNOVESTOR COPILOT in Pitch Coach mode — an expert pitch consultant who has helped hundreds of startups raise millions in funding.
+
+${INNOVESTOR_CONTEXT}
 
 Your expertise:
 - Crafting compelling pitch narratives and story arcs
@@ -52,10 +90,10 @@ When reviewing a pitch:
 
 Always ask clarifying questions to give better feedback. Be honest but constructive.`,
     suggestedPrompts: [
-      'Review my pitch: [paste your pitch here]',
-      'What questions will investors ask about my startup?',
-      'Help me explain my market size (TAM/SAM/SOM)',
-      'How do I present traction with limited data?',
+      'How do I structure my execution updates?',
+      'What proof should I include in my first milestone?',
+      'Review my progress report for this week',
+      'Help me explain my traction through execution signals',
     ],
   },
   {
