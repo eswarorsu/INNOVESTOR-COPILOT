@@ -1,73 +1,56 @@
-# React + TypeScript + Vite
+# INNOVESTOR COPILOT
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+INNOVESTOR COPILOT is an elite AI assistant platform specializing in startups, venture capital, entrepreneurship, and investment strategy. It is built to empower the Innovestor ecosystem.
 
-Currently, two official plugins are available:
+### Platform Information
+- **Company Name:** Innovestor
+- **Official Website:** [innovestor.online](https://innovestor.online)
+- **Headquarters:** Visakhapatnam (Vizag), Andhra Pradesh, India
+- **Founded:** 2025
+- **Founders:** Founded by two students from Andhra Pradesh, India
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+### Mission & Vision
+- **Mission:** Enable founders to demonstrate credibility through execution and provide investors with better signals for discovering early-stage opportunities.
+- **Vision:** Build a trust-first infrastructure where founders prove credibility through execution transparency and investors discover opportunities earlier.
 
-## React Compiler
+### Core Philosophy: "Execution over Ideas"
+Innovestor acts as an early-stage discovery and credibility layer. It moves beyond static pitch decks by focusing on "Execution Signals":
+- Weekly founder updates
+- Development progress & code commits
+- Screenshots or proof of work
+- Validated milestones
+- User feedback and validation
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+### AI Agent Capabilities
+- **General Copilot:** High-level advice on the Innovestor "Execution-First" ecosystem.
+- **Pitch Coach:** Coaching founders to showcase proof of work and build credibility through activity.
+- **Market Analyst:** Researching early-stage trends and transparency-based moats.
+- **Investor Advisor:** Helping angels find "diamond in the rough" founders based on consistency.
+- **Due Diligence:** Checklists that prioritize "Action" over "Slides."
+- **Financial Planner:** Modeling for lean, execution-focused MVP teams.
 
-## Expanding the ESLint configuration
+### Tech Stack
+- **Framework:** React + TypeScript + Vite
+- **AI Engine:** Groq LPU™ (Llama 3.3, Mixtral, Gemma)
+- **Styling:** Vanilla CSS + Framer Motion
+- **Icons:** Lucide React
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+## Getting Started
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+1. **Clone the repository**
+2. **Install dependencies:**
+   ```bash
+   npm install
+   ```
+3. **Environment Variables:**
+   Create a `.env` file and add your Groq API Key:
+   ```env
+   VITE_GROQ_API_KEY=your_api_key_here
+   ```
+4. **Run development server:**
+   ```bash
+   npm run dev
+   ```
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
-
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
-
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+---
+© 2025 Innovestor. Headquartered in Vizag, India.

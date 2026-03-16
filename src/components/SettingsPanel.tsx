@@ -109,7 +109,7 @@ const SettingsPanel: React.FC<SettingsProps> = ({
             <p><strong style={{ color: 'var(--text-secondary)' }}>INNOVESTOR COPILOT</strong></p>
             <p>Version 2.5.0 · Groq Edition</p>
             <p style={{ marginTop: '8px' }}>
-              Powered by Groq LPU™ inference engine. Built for the Innovestor platform to assist founders and investors with blazing-fast AI responses.
+              Powered by Groq LPU™ inference engine. Built for Innovestor (innovestor.online), based in Vizag, AP. Founded in 2025 by <strong>two students from Andhra Pradesh</strong>.
             </p>
           </div>
         </div>
