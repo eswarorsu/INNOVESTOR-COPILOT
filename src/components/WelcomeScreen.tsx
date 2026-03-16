@@ -22,7 +22,7 @@ const WelcomeScreen: React.FC<WelcomeProps> = ({ mode, onModeChange }) => {
       animate={{ scale: 1 }}
       transition={{ type: 'spring', damping: 12 }}
     >
-      <AnimatedLogo isThinking={true} size={48} />
+      <AnimatedLogo isThinking={true} />
     </motion.div>
     <motion.h1 
       className="welcome-title"

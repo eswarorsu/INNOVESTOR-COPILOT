@@ -66,7 +66,16 @@ const AnimatedLogo: React.FC<AnimatedLogoProps> = ({
   };
 
   return (
-    <div className={`animated-logo-container ${className}`} style={{ width: size, height: size, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+    <div 
+      className={`animated-logo-container ${className}`} 
+      style={{ 
+        width: size || '100%', 
+        height: size || '100%', 
+        display: 'flex', 
+        alignItems: 'center', 
+        justifyContent: 'center' 
+      }}
+    >
       <motion.svg
         viewBox="0 0 100 100"
         width="100%"
@@ -75,15 +84,15 @@ const AnimatedLogo: React.FC<AnimatedLogoProps> = ({
         animate={isThinking ? "thinking" : "static"}
         style={{ overflow: 'visible' }}
       >
-        {/* Center Node */}
-        <circle cx="50" cy="50" r="5" fill="currentColor" />
+        <circle className="logo-node-center" cx="50" cy="50" r="5" fill="currentColor" />
 
         {/* Branch 1 - Top Left */}
         <motion.g variants={nodeVariants}>
-          <line x1="50" y1="50" x2="25" y2="30" stroke="currentColor" strokeWidth="6" strokeLinecap="round" />
-          <circle cx="25" cy="30" r="18" fill="white" stroke="currentColor" strokeWidth="4" />
+          <line className="logo-bond" x1="50" y1="50" x2="25" y2="30" stroke="currentColor" strokeWidth="6" strokeLinecap="round" />
+          <circle className="logo-node" cx="25" cy="30" r="18" fill="white" stroke="currentColor" strokeWidth="4" />
           {/* Highlight path */}
           <path 
+            className="logo-highlight"
             d="M 15 28 A 10 10 0 0 1 25 18" 
             fill="none" 
             stroke="currentColor" 
@@ -94,10 +103,11 @@ const AnimatedLogo: React.FC<AnimatedLogoProps> = ({
 
         {/* Branch 2 - Right */}
         <motion.g variants={node2Variants}>
-          <line x1="50" y1="50" x2="80" y2="50" stroke="currentColor" strokeWidth="6" strokeLinecap="round" />
-          <circle cx="80" cy="50" r="22" fill="white" stroke="currentColor" strokeWidth="4" />
+          <line className="logo-bond" x1="50" y1="50" x2="80" y2="50" stroke="currentColor" strokeWidth="6" strokeLinecap="round" />
+          <circle className="logo-node" cx="80" cy="50" r="22" fill="white" stroke="currentColor" strokeWidth="4" />
           {/* Highlight path */}
           <path 
+            className="logo-highlight"
             d="M 70 48 A 12 12 0 0 1 80 36" 
             fill="none" 
             stroke="currentColor" 
@@ -108,10 +118,11 @@ const AnimatedLogo: React.FC<AnimatedLogoProps> = ({
 
         {/* Branch 3 - Bottom Left */}
         <motion.g variants={node3Variants}>
-          <line x1="50" y1="50" x2="35" y2="80" stroke="currentColor" strokeWidth="6" strokeLinecap="round" />
-          <circle cx="35" cy="80" r="18" fill="white" stroke="currentColor" strokeWidth="4" />
+          <line className="logo-bond" x1="50" y1="50" x2="35" y2="80" stroke="currentColor" strokeWidth="6" strokeLinecap="round" />
+          <circle className="logo-node" cx="35" cy="80" r="18" fill="white" stroke="currentColor" strokeWidth="4" />
           {/* Highlight path */}
           <path 
+            className="logo-highlight"
             d="M 25 78 A 10 10 0 0 1 35 68" 
             fill="none" 
             stroke="currentColor" 

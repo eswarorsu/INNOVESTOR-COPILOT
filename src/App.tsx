@@ -253,7 +253,7 @@ const App: React.FC = () => {
                 onClick={() => setShowModelSelector(!showModelSelector)}
                 id="model-selector-btn"
               >
-                AI Models <ChevronDown size={14} />
+                <span className="model-btn-text">AI Models</span> <ChevronDown size={14} />
               </button>
               
               <AnimatePresence>
