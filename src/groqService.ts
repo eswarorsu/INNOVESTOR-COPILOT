@@ -6,7 +6,7 @@ export type GroqModel =
   | 'auto'
   | 'groq/compound'
   | 'groq/compound-mini'
-  | 'nvidia/nemotron-3-super-120b-a12b'
+  | 'nvidia/nemotron-3-super-120b-a12b:free'
   | 'llama-3.1-8b-instant'
   | 'llama-3.3-70b-versatile';
 
@@ -14,7 +14,7 @@ export const GROQ_MODELS: { id: GroqModel; label: string; description: string }[
   { id: 'auto', label: 'Auto (Recommended)', description: 'AI-powered routing · Best model for your query' },
   { id: 'groq/compound', label: 'Groq Compound', description: 'Advanced system · Optimal for tool-use & complex reasoning' },
   { id: 'groq/compound-mini', label: 'Groq Compound Mini', description: 'Lightweight & fast · Best for low-latency agentic tasks' },
-  { id: 'nvidia/nemotron-3-super-120b-a12b', label: 'Nemotron 120B Super', description: 'Nvidia Deep Reasoning · Deep high-value queries' },
+  { id: 'nvidia/nemotron-3-super-120b-a12b:free', label: 'Nemotron 120B Super', description: 'Nvidia Deep Reasoning · Deep high-value queries' },
   { id: 'llama-3.1-8b-instant', label: 'LLaMA 3.1 8B', description: 'Ultra-fast inference · Best for simple, quick answers' },
   { id: 'llama-3.3-70b-versatile', label: 'LLaMA 3.3 70B', description: 'Legacy capability · Best for robust general reasoning' },
 ];
@@ -38,12 +38,12 @@ Available models:
 1. groq/compound-mini → very fast, for simple questions and quick answers
 2. groq/compound → advanced agent model, for deep analysis, research, and multi-step reasoning
 3. llama-3.3-70b-versatile → strong reasoning model for detailed explanations, strategies, and structured outputs
-4. nvidia/nemotron-3-super-120b-a12b → deep reasoning for high-value queries
+4. nvidia/nemotron-3-super-120b-a12b:free → deep reasoning for high-value queries
 5. llama-3.1-8b-instant → fallback model for basic responses
 
 Routing rules:
 * SIMPLE (basic questions, short answers, casual chat) → groq/compound-mini
-* MEDIUM (explanations, longer responses, moderate reasoning) → nvidia/nemotron-3-super-120b-a12b
+* MEDIUM (explanations, longer responses, moderate reasoning) → nvidia/nemotron-3-super-120b-a12b:free
 * COMPLEX (startup analysis, market research, business strategy, comparisons) → llama-3.3-70b-versatile
 * AGENT / DEEP (multi-step tasks, detailed reports, deep research) → groq/compound
 
@@ -146,7 +146,7 @@ Return ONLY the model name, nothing else.`;
       ];
 
       // Handle OpenRouter for Nemotron
-      if (finalModel === 'nvidia/nemotron-3-super-120b-a12b') {
+      if (finalModel === 'nvidia/nemotron-3-super-120b-a12b:free') {
         if (!this.openRouterKey) {
           throw new Error('OpenRouter API key missing');
         }
