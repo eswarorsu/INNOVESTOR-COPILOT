@@ -3,16 +3,14 @@ import type { AgentMode } from './types';
 import { getMode } from './agentModes';
 
 export type GroqModel =
-  | 'llama-3.3-70b-versatile'
+  | 'llama3-70b-8192'
   | 'llama3-8b-8192'
-  | 'mixtral-8x7b-32768'
-  | 'gemma2-9b-it';
+  | 'gemma-7b-it';
 
 export const GROQ_MODELS: { id: GroqModel; label: string; description: string }[] = [
-  { id: 'llama-3.3-70b-versatile', label: 'LLaMA 3.3 70B', description: 'Most capable · Best for complex analysis' },
-  { id: 'mixtral-8x7b-32768', label: 'Mixtral 8x7B', description: 'Great reasoning · 32K context' },
+  { id: 'llama3-70b-8192', label: 'LLaMA 3.3 70B', description: 'Most capable · Best for complex analysis' },
   { id: 'llama3-8b-8192', label: 'LLaMA 3 8B', description: 'Ultra-fast · Best for quick answers' },
-  { id: 'gemma2-9b-it', label: 'Gemma 2 9B', description: 'Google-trained · Efficient & precise' },
+  { id: 'gemma-7b-it', label: 'Gemma 2 9B', description: 'Google-trained · Efficient & precise' },
 ];
 
 interface HistoryMessage {
@@ -24,7 +22,7 @@ class GroqService {
   private client: Groq | null = null;
   private apiKey: string = import.meta.env.VITE_GROQ_API_KEY || '';
   private histories: Map<AgentMode, HistoryMessage[]> = new Map();
-  private selectedModel: GroqModel = 'llama-3.3-70b-versatile';
+  private selectedModel: GroqModel = 'llama3-70b-8192';
 
   constructor() {
     if (this.apiKey) {
