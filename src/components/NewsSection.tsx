@@ -38,7 +38,7 @@ const NewsSection: React.FC = () => {
     <div className="news-container">
       <div className="news-header">
         <div className="news-header-left">
-          <AnimatedLogo size={48} className="news-header-icon" />
+          <AnimatedLogo isThinking={true} size={48} className="news-header-icon" />
           <div>
             <h1 className="news-title">Innovestor News Articles</h1>
             <p className="news-subtitle">The latest in startups, VC, and entrepreneurship from around the globe</p>
