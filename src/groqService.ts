@@ -6,7 +6,7 @@ export type GroqModel =
   | 'auto'
   | 'groq/compound'
   | 'groq/compound-mini'
-  | 'openai/gpt-oss-20b'
+  | 'nvidia/nemotron-3-super-120b-a12b'
   | 'llama-3.1-8b-instant'
   | 'llama-3.3-70b-versatile';
 
@@ -14,7 +14,7 @@ export const GROQ_MODELS: { id: GroqModel; label: string; description: string }[
   { id: 'auto', label: 'Auto (Recommended)', description: 'AI-powered routing · Best model for your query' },
   { id: 'groq/compound', label: 'Groq Compound', description: 'Advanced system · Optimal for tool-use & complex reasoning' },
   { id: 'groq/compound-mini', label: 'Groq Compound Mini', description: 'Lightweight & fast · Best for low-latency agentic tasks' },
-  { id: 'openai/gpt-oss-20b', label: 'GPT-OSS 20B', description: 'Efficient MoE · High performance for agentic workflows' },
+  { id: 'nvidia/nemotron-3-super-120b-a12b', label: 'Nemotron 120B Super', description: 'Nvidia Deep Reasoning · Deep high-value queries' },
   { id: 'llama-3.1-8b-instant', label: 'LLaMA 3.1 8B', description: 'Ultra-fast inference · Best for simple, quick answers' },
   { id: 'llama-3.3-70b-versatile', label: 'LLaMA 3.3 70B', description: 'Legacy capability · Best for robust general reasoning' },
 ];
@@ -27,6 +27,7 @@ interface HistoryMessage {
 class GroqService {
   private client: Groq | null = null;
   private apiKey: string = import.meta.env.VITE_GROQ_API_KEY || '';
+  private openRouterKey: string = import.meta.env.VITE_OPENROUTER_API_KEY || '';
   private histories: Map<AgentMode, HistoryMessage[]> = new Map();
   private selectedModel: GroqModel = 'auto';
 
@@ -37,12 +38,12 @@ Available models:
 1. groq/compound-mini → very fast, for simple questions and quick answers
 2. groq/compound → advanced agent model, for deep analysis, research, and multi-step reasoning
 3. llama-3.3-70b-versatile → strong reasoning model for detailed explanations, strategies, and structured outputs
-4. openai/gpt-oss-20b → balanced model for medium complexity queries
+4. nvidia/nemotron-3-super-120b-a12b → deep reasoning for high-value queries
 5. llama-3.1-8b-instant → fallback model for basic responses
 
 Routing rules:
 * SIMPLE (basic questions, short answers, casual chat) → groq/compound-mini
-* MEDIUM (explanations, longer responses, moderate reasoning) → openai/gpt-oss-20b
+* MEDIUM (explanations, longer responses, moderate reasoning) → nvidia/nemotron-3-super-120b-a12b
 * COMPLEX (startup analysis, market research, business strategy, comparisons) → llama-3.3-70b-versatile
 * AGENT / DEEP (multi-step tasks, detailed reports, deep research) → groq/compound
 
@@ -143,6 +144,63 @@ Return ONLY the model name, nothing else.`;
         { role: 'system' as const, content: modeConfig.systemPrompt },
         ...history.map((h) => ({ role: h.role as 'user' | 'assistant', content: h.content })),
       ];
+
+      // Handle OpenRouter for Nemotron
+      if (finalModel === 'nvidia/nemotron-3-super-120b-a12b') {
+        if (!this.openRouterKey) {
+          throw new Error('OpenRouter API key missing');
+        }
+
+        const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+          method: "POST",
+          headers: {
+            "Authorization": `Bearer ${this.openRouterKey}`,
+            "Content-Type": "application/json",
+            "HTTP-Referer": window.location.origin,
+            "X-Title": "Innovestor Copilot"
+          },
+          body: JSON.stringify({
+            model: finalModel,
+            messages,
+            stream: true,
+          })
+        });
+
+        if (!response.ok) throw new Error('OpenRouter integration failed');
+
+        const reader = response.body?.getReader();
+        const decoder = new TextDecoder();
+        let fullResponse = "";
+
+        if (reader) {
+          while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
+            
+            const chunk = decoder.decode(value, { stream: true });
+            const lines = chunk.split("\n").filter(line => line.trim() !== "");
+            
+            for (const line of lines) {
+              if (line.startsWith("data: ")) {
+                const data = line.slice(6);
+                if (data === "[DONE]") break;
+                try {
+                  const parsed = JSON.parse(data);
+                  const content = parsed.choices[0]?.delta?.content || "";
+                  if (content) {
+                    fullResponse += content;
+                    onChunk(content);
+                  }
+                } catch (e) {}
+              }
+            }
+          }
+        }
+        
+        history.push({ role: 'assistant', content: fullResponse });
+        onDone();
+        return;
+      }
 
       const stream = await this.client.chat.completions.create({
         model: finalModel === 'auto' ? 'groq/compound-mini' : finalModel,
