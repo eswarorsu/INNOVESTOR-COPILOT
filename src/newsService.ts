@@ -16,22 +16,30 @@ export interface NewsArticle {
 
 class NewsService {
   async getStartupNews(): Promise<NewsArticle[]> {
-    if (!NEWS_API_KEY) {
-      console.error('NewsAPI key is missing');
-      return [];
-    }
-
+    const isDev = import.meta.env.DEV;
+    
     try {
-      // Querying for startup, venture capital, and entrepreneurship news
-      const response = await axios.get(`${BASE_URL}/everything`, {
-        params: {
-          q: 'startup OR "venture capital" OR entrepreneurship',
-          sortBy: 'publishedAt',
-          language: 'en',
-          pageSize: 20,
-          apiKey: NEWS_API_KEY,
-        },
-      });
+      let response;
+      
+      if (isDev) {
+        // Direct call for local development (localhost is allowed by NewsAPI free tier)
+        if (!NEWS_API_KEY) {
+          console.error('NewsAPI key is missing in .env');
+          return [];
+        }
+        response = await axios.get(`${BASE_URL}/everything`, {
+          params: {
+            q: 'startup OR "venture capital" OR entrepreneurship',
+            sortBy: 'publishedAt',
+            language: 'en',
+            pageSize: 20,
+            apiKey: NEWS_API_KEY,
+          },
+        });
+      } else {
+        // Call our Vercel Serverless Function in production to bypass domain restrictions
+        response = await axios.get('/api/news');
+      }
 
       return response.data.articles || [];
     } catch (error) {
