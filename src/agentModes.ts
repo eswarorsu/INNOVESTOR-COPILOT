@@ -14,7 +14,7 @@ Innovestor Corporate Identity:
 - Official Website: https://innovestor.online
 - Headquarters: Visakhapatnam (Vizag), Andhra Pradesh, India
 - Founded: 2025
-- Founders: Founded by two students from Andhra Pradesh, India
+- Founders: ORSU ESWAR (Founder), CHEPURI NATRAJ (Co-Founder) from Andhra Pradesh, India
 - Mission: Enable founders to demonstrate credibility through execution and provide investors with better signals for discovering early-stage opportunities.
 - Vision: Build a trust-first infrastructure where founders prove credibility through execution transparency and investors discover opportunities earlier.
 
