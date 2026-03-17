@@ -3,14 +3,12 @@ import type { AgentMode } from './types';
 import { getMode } from './agentModes';
 
 export type GroqModel =
-  | 'llama3-70b-8192'
-  | 'llama3-8b-8192'
-  | 'gemma-7b-it';
+  | 'llama-3.1-70b-versatile'
+  | 'llama-3.1-8b-instant';
 
 export const GROQ_MODELS: { id: GroqModel; label: string; description: string }[] = [
-  { id: 'llama3-70b-8192', label: 'LLaMA 3.3 70B', description: 'Most capable · Best for complex analysis' },
-  { id: 'llama3-8b-8192', label: 'LLaMA 3 8B', description: 'Ultra-fast · Best for quick answers' },
-  { id: 'gemma-7b-it', label: 'Gemma 2 9B', description: 'Google-trained · Efficient & precise' },
+  { id: 'llama-3.1-70b-versatile', label: 'LLaMA 3.1 70B', description: 'Most capable · Best for complex analysis' },
+  { id: 'llama-3.1-8b-instant', label: 'LLaMA 3.1 8B', description: 'Ultra-fast · Best for quick answers' },
 ];
 
 interface HistoryMessage {
@@ -22,7 +20,7 @@ class GroqService {
   private client: Groq | null = null;
   private apiKey: string = import.meta.env.VITE_GROQ_API_KEY || '';
   private histories: Map<AgentMode, HistoryMessage[]> = new Map();
-  private selectedModel: GroqModel = 'llama3-70b-8192';
+  private selectedModel: GroqModel = 'llama-3.1-70b-versatile';
 
   constructor() {
     if (this.apiKey) {
