@@ -3,12 +3,18 @@ import type { AgentMode } from './types';
 import { getMode } from './agentModes';
 
 export type GroqModel =
-  | 'llama-3.1-70b-versatile'
-  | 'llama-3.1-8b-instant';
+  | 'groq/compound'
+  | 'groq/compound-mini'
+  | 'openai/gpt-oss-20b'
+  | 'llama-3.1-8b-instant'
+  | 'llama-3.3-70b-versatile';
 
 export const GROQ_MODELS: { id: GroqModel; label: string; description: string }[] = [
-  { id: 'llama-3.1-70b-versatile', label: 'LLaMA 3.1 70B', description: 'Most capable · Best for complex analysis' },
-  { id: 'llama-3.1-8b-instant', label: 'LLaMA 3.1 8B', description: 'Ultra-fast · Best for quick answers' },
+  { id: 'groq/compound', label: 'Groq Compound', description: 'Advanced system · Optimal for tool-use & complex reasoning' },
+  { id: 'groq/compound-mini', label: 'Groq Compound Mini', description: 'Lightweight & fast · Best for low-latency agentic tasks' },
+  { id: 'openai/gpt-oss-20b', label: 'GPT-OSS 20B', description: 'Efficient MoE · High performance for agentic workflows' },
+  { id: 'llama-3.1-8b-instant', label: 'LLaMA 3.1 8B', description: 'Ultra-fast inference · Best for simple, quick answers' },
+  { id: 'llama-3.3-70b-versatile', label: 'LLaMA 3.3 70B', description: 'Legacy capability · Best for robust general reasoning' },
 ];
 
 interface HistoryMessage {
@@ -20,7 +26,7 @@ class GroqService {
   private client: Groq | null = null;
   private apiKey: string = import.meta.env.VITE_GROQ_API_KEY || '';
   private histories: Map<AgentMode, HistoryMessage[]> = new Map();
-  private selectedModel: GroqModel = 'llama-3.1-70b-versatile';
+  private selectedModel: GroqModel = 'llama-3.3-70b-versatile';
 
   constructor() {
     if (this.apiKey) {
