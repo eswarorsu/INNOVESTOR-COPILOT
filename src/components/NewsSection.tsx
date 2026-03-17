@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ExternalLink, Calendar, Newspaper, RefreshCw, AlertCircle } from 'lucide-react';
+import { ExternalLink, Calendar, RefreshCw, AlertCircle } from 'lucide-react';
 import { newsService, type NewsArticle } from '../newsService';
+import AnimatedLogo from './AnimatedLogo';
 
 const NewsSection: React.FC = () => {
   const [articles, setArticles] = useState<NewsArticle[]>([]);
@@ -37,7 +38,7 @@ const NewsSection: React.FC = () => {
     <div className="news-container">
       <div className="news-header">
         <div className="news-header-left">
-          <Newspaper className="news-header-icon" />
+          <AnimatedLogo size={48} className="news-header-icon" />
           <div>
             <h1 className="news-title">Innovestor News Articles</h1>
             <p className="news-subtitle">The latest in startups, VC, and entrepreneurship from around the globe</p>
