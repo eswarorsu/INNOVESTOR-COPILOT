@@ -44,7 +44,7 @@ class NewsService {
 
       if (isDev) {
         // Local Dev: Fetch from both directly
-        const newsDataKey = import.meta.env['VITE_NewsData_API_KEY'] || '';
+        const newsDataKey = import.meta.env.VITE_NewsData_API_KEY || '';
         
         let queryStr = '("startup" OR "founder") AND ("growth" OR "scale" OR "unicorn" OR "funding" OR "venture capital" OR "seed round" OR "strategy" OR "failure" OR "pivot" OR "ecosystem" OR "buildinpublic")';
         if (region === 'india') {

@@ -1618,12 +1618,17 @@ body {
 /* Responsive Overhaul - Premium Mobile Experience */
 @media (max-width: 768px) {
   .topbar {
-    padding: 0 12px;
-    height: 60px;
+    padding: 10px 16px;
+    height: auto; /* Allow topbar to breathe if content wraps */
+    gap: 12px;
   }
   
   .topbar-right {
     gap: 8px;
+  }
+
+  .topbar-switcher-wrapper {
+    margin-top: 5px; /* Add slight separation from tabs */
   }
 
   .welcome-screen {
@@ -1636,11 +1641,11 @@ body {
   }
 
   .welcome-logo {
-    width: 42px; /* Even smaller logo */
-    height: 42px;
-    border-radius: 10px;
-    margin-bottom: 16px;
-    margin-top: -10px;
+    width: 60px; /* Restored size slightly for presence */
+    height: 60px;
+    border-radius: 16px;
+    margin-bottom: 24px;
+    margin-top: 0;
   }
 
   .welcome-title {
@@ -1650,11 +1655,12 @@ body {
   }
 
   .welcome-subtitle {
-    font-size: 11px; /* Smaller subtitle */
-    margin-bottom: 24px;
-    padding: 0 30px;
-    max-width: 300px;
-    line-height: 1.4;
+    font-size: 13px; /* More readable font */
+    margin-bottom: 32px;
+    padding: 0 20px;
+    max-width: 100%;
+    line-height: 1.5;
+    color: var(--text-secondary);
   }
 
   .welcome-mode-highlight {
@@ -1680,9 +1686,8 @@ body {
     top: auto;
     left: auto;
     transform: none;
-    padding: 0;
+    padding: 30px 16px;
     width: 100%;
-    max-width: 100%;
     margin-top: 0;
     z-index: 10;
   }
@@ -1756,18 +1761,25 @@ body {
   }
 
   .landed-suggestions {
-    margin-top: 12px;
+    margin-top: 16px;
     min-height: auto;
-    gap: 6px;
-    padding: 0 10px;
-    max-width: 320px;
-    justify-content: center;
+    gap: 8px;
+    padding: 0 16px;
+    display: flex;
+    flex-direction: column; /* Stack vertically for mobile */
+    align-items: center;
+    width: 100%;
+    max-width: 100%;
   }
 
   .landed-suggestion-btn {
-    font-size: 11px; /* Compact suggestion text */
-    padding: 5px 10px;
+    font-size: 13px; /* Slightly larger for easier tap */
+    padding: 10px 16px;
     border-radius: 12px;
+    width: 90%; /* One by one downwards */
+    text-align: center;
+    white-space: normal;
+    line-height: 1.3;
   }
 
   .message-wrapper {
@@ -1820,6 +1832,26 @@ body {
     right: -5px;
     width: 280px;
     bottom: calc(100% + 15px);
+  }
+
+  /* Restore Switcher Layout for Mobile */
+  .topbar-switcher-wrapper {
+    position: relative;
+    left: auto;
+    transform: none;
+    order: 3;
+    width: 100%;
+    margin-top: 10px;
+  }
+  
+  .topbar-switcher {
+    width: 100%;
+  }
+  
+  .switcher-btn {
+    flex: 1;
+    display: flex;
+    justify-content: center;
   }
 }
 
@@ -2116,40 +2148,96 @@ body {
   opacity: 1;
 }
 
-@media (max-width: 768px) {
-  .topbar-switcher-wrapper {
-    position: relative;
-    left: auto;
-    transform: none;
-    order: 3;
-    width: 100%;
-    margin-top: 10px;
-  }
-  
-  .topbar {
-    flex-wrap: wrap;
-    padding: 10px 15px;
-  }
-  
-  .topbar-switcher {
-    width: 100%;
-  }
-  
-  .switcher-btn {
-    flex: 1;
-    display: flex;
-    justify-content: center;
-  }
-  
   .news-container {
-    padding: 20px 15px;
+    padding: 24px 16px;
   }
   
+  .news-header {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 20px;
+    margin-bottom: 32px;
+  }
+
+  .news-header-left {
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .news-header-icon {
+    width: 56px;
+    height: 56px;
+    padding: 10px;
+    margin: 0 auto;
+  }
+
   .news-title {
-    font-size: 24px;
+    font-size: 22px;
+    letter-spacing: -0.5px;
+  }
+
+  .news-subtitle {
+    font-size: 13px;
+    line-height: 1.5;
+    padding: 0 20px;
+  }
+
+  .news-actions {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    align-items: center;
+  }
+
+  .news-region-toggle {
+    width: 100%;
+    max-width: 280px;
+  }
+
+  .region-btn {
+    flex: 1;
+    font-size: 11px;
+    padding: 10px 0;
+  }
+
+  .news-date-picker {
+    width: 100%;
+    max-width: 280px !important;
+    height: 44px;
+    text-align: center;
+  }
+
+  .news-refresh-btn {
+    width: 100%;
+    max-width: 280px;
+    height: 48px;
+    justify-content: center;
+    font-size: 14px;
+    border-radius: 16px;
   }
   
   .news-grid {
     grid-template-columns: 1fr;
+    gap: 20px;
+  }
+
+  .news-card {
+    border-radius: 24px;
+  }
+
+  .news-card-content {
+    padding: 16px;
+  }
+
+  .news-card-title {
+    font-size: 16px;
+    margin-bottom: 8px;
+  }
+
+  .news-card-desc {
+    font-size: 13px;
+    line-height: 1.5;
   }
 }
