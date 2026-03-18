@@ -140,8 +140,14 @@ Return ONLY the model name, nothing else.`;
         console.log(`[GroqService] Auto-routed to: ${finalModel}`);
       }
 
+      const globalFormattingRules = `
+CRITICAL FORMATTING RULES:
+- Never output Markdown tables.
+- Structure complex data using a clear hierarchy: Title (##), Subtitle (###), Bullet Points, and Examples.
+- Keep the output readable and well-grouped so a user feels it is easy to read.`;
+
       const messages = [
-        { role: 'system' as const, content: modeConfig.systemPrompt },
+        { role: 'system' as const, content: modeConfig.systemPrompt + globalFormattingRules },
         ...history.map((h) => ({ role: h.role as 'user' | 'assistant', content: h.content })),
       ];
 

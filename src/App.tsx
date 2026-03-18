@@ -53,7 +53,9 @@ const App: React.FC = () => {
   const currentMode = getMode(activeMode);
 
   useEffect(() => {
-    chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    // We use 'auto' instead of 'smooth' to prevent aggressive jittering
+    // when the AI streams hundreds of characters per second.
+    chatEndRef.current?.scrollIntoView({ behavior: 'auto' });
   }, [messages, showTyping]);
 
   const showToast = (msg: string) => {

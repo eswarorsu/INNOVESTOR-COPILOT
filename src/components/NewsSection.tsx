@@ -8,12 +8,14 @@ const NewsSection: React.FC = () => {
   const [articles, setArticles] = useState<NewsArticle[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
+  const [selectedDate, setSelectedDate] = useState('');
+  const [region, setRegion] = useState<'global' | 'india'>('global');
 
-  const fetchNews = async () => {
+  const fetchNews = async (date?: string, newsRegion?: 'global' | 'india') => {
     setLoading(true);
     setError(false);
     try {
-      const data = await newsService.getStartupNews();
+      const data = await newsService.getStartupNews(date, newsRegion || region);
       setArticles(data.filter(a => a.urlToImage && a.title));
     } catch (err) {
       setError(true);
@@ -23,8 +25,8 @@ const NewsSection: React.FC = () => {
   };
 
   useEffect(() => {
-    fetchNews();
-  }, []);
+    fetchNews(selectedDate, region);
+  }, [selectedDate, region]);
 
   const formatDate = (dateStr: string) => {
     return new Date(dateStr).toLocaleDateString(undefined, {
@@ -44,10 +46,69 @@ const NewsSection: React.FC = () => {
             <p className="news-subtitle">The latest in startups, VC, and entrepreneurship from around the globe</p>
           </div>
         </div>
-        <button className="news-refresh-btn" onClick={fetchNews} disabled={loading}>
-          <RefreshCw className={loading ? 'spinning' : ''} size={16} />
-          <span>Refresh</span>
-        </button>
+        <div className="news-actions" style={{ display: 'flex', gap: '12px', alignItems: 'center', flexWrap: 'wrap' }}>
+          <div className="news-region-toggle" style={{
+            display: 'flex',
+            background: 'rgba(255,255,255,0.05)',
+            border: '1px solid rgba(255,255,255,0.1)',
+            borderRadius: '8px',
+            overflow: 'hidden'
+          }}>
+            <button 
+              className={`region-btn ${region === 'global' ? 'active' : ''}`}
+              onClick={() => setRegion('global')}
+              style={{
+                background: region === 'global' ? 'rgba(99, 102, 241, 0.2)' : 'transparent',
+                color: region === 'global' ? '#fff' : '#aaa',
+                border: 'none',
+                padding: '6px 12px',
+                fontSize: '12px',
+                fontWeight: region === 'global' ? '600' : '400',
+                cursor: 'pointer',
+                transition: 'all 0.2s'
+              }}
+            >
+              GLOBAL
+            </button>
+            <button 
+              className={`region-btn ${region === 'india' ? 'active' : ''}`}
+              onClick={() => setRegion('india')}
+              style={{
+                background: region === 'india' ? 'rgba(99, 102, 241, 0.2)' : 'transparent',
+                color: region === 'india' ? '#fff' : '#aaa',
+                border: 'none',
+                padding: '6px 12px',
+                fontSize: '12px',
+                fontWeight: region === 'india' ? '600' : '400',
+                cursor: 'pointer',
+                transition: 'all 0.2s'
+              }}
+            >
+              IN INDIA
+            </button>
+          </div>
+          <input 
+            type="date" 
+            className="news-date-picker" 
+            value={selectedDate} 
+            onChange={(e) => setSelectedDate(e.target.value)}
+            max={new Date().toISOString().split('T')[0]}
+            style={{
+              background: 'rgba(255,255,255,0.05)',
+              border: '1px solid rgba(255,255,255,0.1)',
+              color: '#fff',
+              padding: '6px 12px',
+              borderRadius: '8px',
+              fontSize: '13px',
+              fontFamily: 'inherit',
+              cursor: 'pointer'
+            }}
+          />
+          <button className="news-refresh-btn" onClick={() => fetchNews(selectedDate, region)} disabled={loading}>
+            <RefreshCw className={loading ? 'spinning' : ''} size={16} />
+            <span>Refresh</span>
+          </button>
+        </div>
       </div>
 
       {loading ? (

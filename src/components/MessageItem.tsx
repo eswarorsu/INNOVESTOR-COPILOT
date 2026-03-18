@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 import { motion } from 'framer-motion';
 import { CircleUserRound } from 'lucide-react';
 import type { Message } from '../types';
@@ -12,6 +13,46 @@ interface MessageProps {
 const MessageItem: React.FC<MessageProps> = ({ message }) => {
   const isUser = message.role === 'user';
   const time = message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+  // Smooth streaming logic state
+  const [displayedContent, setDisplayedContent] = useState(isUser ? message.content : '');
+  const contentRef = React.useRef(message.content);
+
+  // Sync the latest network content to a ref immediately so the animation loop can see it without restarting
+  useEffect(() => {
+    contentRef.current = message.content;
+  }, [message.content]);
+
+  useEffect(() => {
+    if (isUser) {
+      setDisplayedContent(message.content);
+      return;
+    }
+
+    if (!message.isStreaming) {
+      // Immediately finalize text when streaming stops
+      setDisplayedContent(message.content);
+      return;
+    }
+
+    // Single unbroken loop to drain characters from the ref
+    let animationFrameId: number;
+    const updateContent = () => {
+      setDisplayedContent(prev => {
+        const targetContent = contentRef.current;
+        const diff = targetContent.length - prev.length;
+        if (diff > 0) {
+          const step = Math.max(1, Math.min(diff, Math.ceil(diff / 4)));
+          return targetContent.slice(0, prev.length + step);
+        }
+        return prev;
+      });
+      animationFrameId = requestAnimationFrame(updateContent);
+    };
+
+    animationFrameId = requestAnimationFrame(updateContent);
+    return () => cancelAnimationFrame(animationFrameId);
+  }, [isUser, message.isStreaming]); // Remove message.content from dependencies!
 
   return (
     <motion.div 
@@ -33,7 +74,7 @@ const MessageItem: React.FC<MessageProps> = ({ message }) => {
             message.content
           ) : (
             <>
-              <ReactMarkdown>{message.content}</ReactMarkdown>
+              <ReactMarkdown remarkPlugins={[remarkGfm]}>{displayedContent}</ReactMarkdown>
               {message.isStreaming && <span className="streaming-cursor" />}
             </>
           )}
