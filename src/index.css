@@ -2199,6 +2199,7 @@ body {
   opacity: 1;
 }
 
+@media (max-width: 768px) {
   .news-container {
     padding: 24px 16px; /* Reset padding for natural flow */
   }
