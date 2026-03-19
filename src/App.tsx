@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { Trash2, Zap, Paperclip, Mic, ChevronDown, Database } from 'lucide-react';
+import { Trash2, Zap, Paperclip, Mic, ChevronDown, Database, Download } from 'lucide-react';
 
 import type { Message, AgentMode } from './types';
 import { GROQ_MODELS, groqService, type GroqModel } from './groqService';
@@ -49,6 +49,31 @@ const App: React.FC = () => {
 
   const chatEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const [installPrompt, setInstallPrompt] = useState<any>(null);
+
+  useEffect(() => {
+    const handleBeforeInstallPrompt = (e: any) => {
+      e.preventDefault();
+      setInstallPrompt(e);
+      console.log('Install prompt captured');
+    };
+
+    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+
+    return () => {
+      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+    };
+  }, []);
+
+  const handleInstallClick = async () => {
+    if (!installPrompt) return;
+    installPrompt.prompt();
+    const { outcome } = await installPrompt.userChoice;
+    if (outcome === 'accepted') {
+      setInstallPrompt(null);
+      showToast('Installing Innovestor...');
+    }
+  };
 
   const currentMode = getMode(activeMode);
 
@@ -227,6 +252,22 @@ const App: React.FC = () => {
               <Trash2 size={14} />
               <span>Clear</span>
             </button>
+
+            {installPrompt && (
+              <button 
+                className="clear-btn" 
+                onClick={handleInstallClick} 
+                id="pwa-install-topbar-btn"
+                style={{ 
+                  background: 'var(--accent-gradient)', 
+                  borderColor: 'transparent',
+                  color: 'white'
+                }}
+              >
+                <Download size={14} />
+                <span>Install</span>
+              </button>
+            )}
           </div>
         </div>
 

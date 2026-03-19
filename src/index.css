@@ -2293,3 +2293,34 @@ body {
     line-height: 1.5;
   }
 }
+
+/* ─── PWA Install Section ────────────────────────────────── */
+.pwa-install-section {
+  padding: 16px;
+  background: rgba(99, 102, 241, 0.05);
+  border: 1px solid rgba(99, 102, 241, 0.15) !important;
+  border-radius: var(--radius-md) !important;
+  margin-top: 10px;
+  animation: glow-in 1s ease infinite alternate;
+}
+
+@keyframes glow-in {
+  from { box-shadow: 0 0 5px rgba(99, 102, 241, 0.1); }
+  to { box-shadow: 0 0 15px rgba(99, 102, 241, 0.2); }
+}
+
+.install-btn {
+  font-weight: 700 !important;
+  letter-spacing: 0.5px;
+  padding: 12px !important;
+}
+
+.flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.gap-2 {
+  gap: 8px;
+}
