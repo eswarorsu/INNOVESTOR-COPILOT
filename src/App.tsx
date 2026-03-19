@@ -350,7 +350,7 @@ const App: React.FC = () => {
                                 >
                                   <div className="item-main">
                                     <Database size={16} />
-                                    <span>{model.label}</span>
+                                    <span className="item-label">{model.label}</span>
                                   </div>
                                 </button>
                               ))}
