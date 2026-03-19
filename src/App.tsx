@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { Trash2, Paperclip, Mic, ChevronDown, Database, Download } from 'lucide-react';
+import { Trash2, Zap, Paperclip, Mic, ChevronDown, Database, Download } from 'lucide-react';
 
 import type { Message, AgentMode } from './types';
 import { GROQ_MODELS, groqService, type GroqModel } from './groqService';
@@ -10,6 +10,7 @@ import { getMode } from './agentModes';
 import MessageItem from './components/MessageItem';
 import WelcomeScreen from './components/WelcomeScreen';
 import AnimatedLogo from './components/AnimatedLogo';
+import DynamicIcon from './components/DynamicIcon';
 import NewsSection from './components/NewsSection';
 import { Newspaper, MessageSquare } from 'lucide-react';
 
@@ -184,6 +185,7 @@ const App: React.FC = () => {
     handleSend(text);
   };
 
+  const activeModelInfo = GROQ_MODELS.find((m) => m.id === activeModel);
 
   return (
     <div className="app-layout">
@@ -195,55 +197,72 @@ const App: React.FC = () => {
       </div>
 
       <div className="main-area">
-        {/* Floating Switcher - Center */}
-        <div className="floating-switcher-container">
-          <div className="topbar-switcher">
+        {/* Top Bar */}
+        <div className="topbar">
+          <div className="topbar-left">
+            <div className="topbar-mode-badge">
+              <div className="topbar-mode-dot" style={{ background: currentMode.color }} />
+              <DynamicIcon name={currentMode.icon} size={14} color={currentMode.color} style={{ marginRight: '6px' }} />
+              <span>{currentMode.label}</span>
+            </div>
+            <div className="topbar-model-badge" title={activeModelInfo?.description}>
+              <Zap size={10} style={{ marginRight: '4px' }} />
+              {activeModelInfo?.label}
+            </div>
+          </div>
+
+          <div className="topbar-switcher-wrapper">
+            <div className="topbar-switcher">
+              <button 
+                className={`switcher-btn ${view === 'copilot' ? 'active' : ''}`}
+                onClick={() => setView('copilot')}
+              >
+                <div className="switcher-btn-content">
+                  <MessageSquare size={14} />
+                  <span>Innovestor Copilot</span>
+                </div>
+              </button>
+              <button 
+                className={`switcher-btn ${view === 'news' ? 'active' : ''}`}
+                onClick={() => setView('news')}
+              >
+                <div className="switcher-btn-content">
+                  <Newspaper size={14} />
+                  <span>Startup News AI</span>
+                </div>
+              </button>
+              <div className="switcher-pill-bg" style={{ left: view === 'copilot' ? '4px' : 'calc(50% + 2px)' }} />
+            </div>
+          </div>
+
+          <div className="topbar-right">
             <button 
-              className={`switcher-btn ${view === 'copilot' ? 'active' : ''}`}
-              onClick={() => setView('copilot')}
+              className="clear-btn" 
+              onClick={clearChat} 
+              id="clear-chat-btn" 
+              disabled={messages.length === 0}
             >
-              <div className="switcher-btn-content">
-                <MessageSquare size={14} />
-                <span>Innovestor Copilot</span>
-              </div>
+              <Trash2 size={14} />
+              <span>Clear</span>
             </button>
-            <button 
-              className={`switcher-btn ${view === 'news' ? 'active' : ''}`}
-              onClick={() => setView('news')}
-            >
-              <div className="switcher-btn-content">
-                <Newspaper size={14} />
-                <span>Startup News AI</span>
-              </div>
-            </button>
-            <div className="switcher-pill-bg" style={{ left: view === 'copilot' ? '4px' : 'calc(50% + 2px)' }} />
+
+            {installPrompt && (
+              <button 
+                className="clear-btn pwa-badge" 
+                onClick={handleInstall} 
+                id="pwa-install-topbar-btn"
+                style={{ 
+                  background: 'var(--accent-gradient)', 
+                  borderColor: 'transparent',
+                  color: 'white'
+                }}
+              >
+                <Download size={14} />
+                <span>Install App</span>
+              </button>
+            )}
           </div>
         </div>
-
-        {/* Floating Actions - Right */}
-        <div className="floating-actions-container">
-          <button 
-            className="floating-action-btn clear-btn" 
-            onClick={clearChat} 
-            id="clear-chat-btn" 
-            disabled={messages.length === 0}
-            title="Clear Chat"
-          >
-            <Trash2 size={16} />
-          </button>
-
-          {installPrompt && (
-            <button 
-              className="floating-action-btn install-btn" 
-              onClick={handleInstall} 
-              id="pwa-install-btn"
-              title="Install App"
-            >
-              <Download size={16} />
-            </button>
-          )}
-        </div>
-
 
         {/* View Container */}
         <div className="view-container">
