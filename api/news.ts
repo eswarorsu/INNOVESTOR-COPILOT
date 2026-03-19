@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-import { VercelRequest, VercelResponse } from '@vercel/node';
+import type { VercelRequest, VercelResponse } from '@vercel/node';
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   // Extract API key from environment variables
