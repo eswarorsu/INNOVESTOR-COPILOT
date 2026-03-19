@@ -46,26 +46,32 @@ const App: React.FC = () => {
   const [showTyping, setShowTyping] = useState(false);
   const [toast, setToast] = useState('');
   const [view, setView] = useState<'copilot' | 'news'>('copilot');
+  const [installPrompt, setInstallPrompt] = useState<any>(null);
 
   const chatEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
-  const [installPrompt, setInstallPrompt] = useState<any>(null);
+
+  const currentMode = getMode(activeMode);
+
+  const showToast = (msg: string) => {
+    setToast(msg);
+    setTimeout(() => setToast(''), 2500);
+  };
 
   useEffect(() => {
-    const handleBeforeInstallPrompt = (e: any) => {
+    chatEndRef.current?.scrollIntoView({ behavior: 'auto' });
+  }, [messages, showTyping]);
+
+  useEffect(() => {
+    const handleBefore = (e: any) => {
       e.preventDefault();
       setInstallPrompt(e);
-      console.log('Install prompt captured');
     };
-
-    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
-
-    return () => {
-      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
-    };
+    window.addEventListener('beforeinstallprompt', handleBefore);
+    return () => window.removeEventListener('beforeinstallprompt', handleBefore);
   }, []);
 
-  const handleInstallClick = async () => {
+  const handleInstall = async () => {
     if (!installPrompt) return;
     installPrompt.prompt();
     const { outcome } = await installPrompt.userChoice;
@@ -73,19 +79,6 @@ const App: React.FC = () => {
       setInstallPrompt(null);
       showToast('Installing Innovestor...');
     }
-  };
-
-  const currentMode = getMode(activeMode);
-
-  useEffect(() => {
-    // We use 'auto' instead of 'smooth' to prevent aggressive jittering
-    // when the AI streams hundreds of characters per second.
-    chatEndRef.current?.scrollIntoView({ behavior: 'auto' });
-  }, [messages, showTyping]);
-
-  const showToast = (msg: string) => {
-    setToast(msg);
-    setTimeout(() => setToast(''), 2500);
   };
 
 
@@ -108,7 +101,7 @@ const App: React.FC = () => {
     if (!content || isStreaming) return;
 
     const userMsg: Message = {
-      id: crypto.randomUUID(),
+      id: (typeof crypto !== 'undefined' && crypto.randomUUID) ? crypto.randomUUID() : Math.random().toString(36).substring(2),
       role: 'user',
       content,
       timestamp: new Date(),
@@ -127,7 +120,7 @@ const App: React.FC = () => {
     await new Promise((r) => setTimeout(r, 400));
     setShowTyping(false);
 
-    const aiMsgId = crypto.randomUUID();
+    const aiMsgId = (typeof crypto !== 'undefined' && crypto.randomUUID) ? crypto.randomUUID() : Math.random().toString(36).substring(2);
     const aiMsg: Message = {
       id: aiMsgId,
       role: 'model',
@@ -255,8 +248,8 @@ const App: React.FC = () => {
 
             {installPrompt && (
               <button 
-                className="clear-btn" 
-                onClick={handleInstallClick} 
+                className="clear-btn pwa-badge" 
+                onClick={handleInstall} 
                 id="pwa-install-topbar-btn"
                 style={{ 
                   background: 'var(--accent-gradient)', 
@@ -265,13 +258,13 @@ const App: React.FC = () => {
                 }}
               >
                 <Download size={14} />
-                <span>Install</span>
+                <span>Install App</span>
               </button>
             )}
           </div>
         </div>
 
-        {/* View Content Display */}
+        {/* View Container */}
         <div className="view-container">
           <AnimatePresence mode="wait">
             {view === 'copilot' ? (
@@ -283,7 +276,6 @@ const App: React.FC = () => {
                 exit={{ opacity: 0, x: -20 }}
                 transition={{ duration: 0.3 }}
               >
-                {/* Chat Area */}
                 <div className="chat-area">
                   <AnimatePresence mode="wait">
                     {messages.length === 0 && !showTyping ? (
@@ -312,7 +304,6 @@ const App: React.FC = () => {
                   <div ref={chatEndRef} />
                 </div>
 
-                {/* Input Area */}
                 <div className={`input-area ${messages.length === 0 ? 'centered' : ''}`}>
                   <div className="input-container">
                     <button className="input-action-btn" title="Attach file">
@@ -334,7 +325,6 @@ const App: React.FC = () => {
                       <button 
                         className="auto-badge" 
                         onClick={() => setShowModelSelector(!showModelSelector)}
-                        id="model-selector-btn"
                       >
                         <span className="model-btn-text">AI Models</span> <ChevronDown size={14} />
                       </button>
@@ -346,7 +336,6 @@ const App: React.FC = () => {
                             initial={{ opacity: 0, y: 10, scale: 0.95 }}
                             animate={{ opacity: 1, y: 0, scale: 1 }}
                             exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                            transition={{ type: 'spring', damping: 20, stiffness: 300 }}
                           >
                             <div className="popover-header">AI MODEL</div>
                             <div className="popover-list">
@@ -360,10 +349,9 @@ const App: React.FC = () => {
                                   }}
                                 >
                                   <div className="item-main">
-                                    <Database size={16} className="item-icon" />
-                                    <span className="item-label">{model.label}</span>
+                                    <Database size={16} />
+                                    <span>{model.label}</span>
                                   </div>
-                                  <span className="item-description">{model.description}</span>
                                 </button>
                               ))}
                             </div>
@@ -372,7 +360,7 @@ const App: React.FC = () => {
                       </AnimatePresence>
                     </div>
 
-                    <button className="input-action-btn" title="Voice input">
+                    <button className="input-action-btn">
                       <Mic size={18} />
                     </button>
 
@@ -380,27 +368,18 @@ const App: React.FC = () => {
                       className="send-btn-circle"
                       onClick={() => handleSend()}
                       disabled={!input.trim() || isStreaming}
-                      id="send-btn"
-                      title="Send message"
                     >
                       <div className="voice-wave">
-                        <div className="wave-bar" style={{ height: '12px' }} />
-                        <div className="wave-bar" style={{ height: '18px' }} />
-                        <div className="wave-bar" style={{ height: '12px' }} />
+                        <div className="wave-bar" />
+                        <div className="wave-bar" />
+                        <div className="wave-bar" />
                       </div>
                     </button>
                   </div>
 
-                  <AnimatePresence mode="wait">
+                  <AnimatePresence>
                     {messages.length === 0 && (
-                      <motion.div 
-                        key={activeMode}
-                        className="landed-suggestions"
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: -10 }}
-                        transition={{ duration: 0.3 }}
-                      >
+                      <motion.div className="landed-suggestions">
                         {currentMode.suggestedPrompts.slice(0, 4).map((prompt, idx) => (
                           <button 
                             key={idx} 
@@ -422,7 +401,6 @@ const App: React.FC = () => {
                 initial={{ opacity: 0, x: 20 }}
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: 20 }}
-                transition={{ duration: 0.3 }}
               >
                 <NewsSection />
               </motion.div>
@@ -433,12 +411,7 @@ const App: React.FC = () => {
 
       <AnimatePresence>
         {toast && (
-          <motion.div 
-            className="toast"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.9 }}
-          >
+          <motion.div className="toast">
             {toast}
           </motion.div>
         )}
