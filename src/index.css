@@ -1926,8 +1926,16 @@ body {
   }
   
   .topbar-model-badge {
-    font-size: 10px;
-    padding: 3px 6px;
+    display: none; /* Hide model badge on tiny screens to save space */
+  }
+
+  .topbar {
+    padding: 8px 12px;
+    gap: 8px;
+  }
+
+  .topbar-mode-badge {
+    padding: 6px 8px;
   }
 }
 
