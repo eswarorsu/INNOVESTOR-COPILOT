@@ -12,9 +12,39 @@ export interface NewsArticle {
   source: {
     name: string;
   };
+  author?: string;
+  category?: string;
 }
 
 class NewsService {
+  async getStartupByDocNews(): Promise<NewsArticle[]> {
+    try {
+      const response = await axios.get('https://startupbydoc.com/wp-json/wp/v2/posts?_embed&per_page=10');
+      const posts = response.data;
+      
+      return posts.map((post: any) => {
+        // Extract featured image if available
+        let imageUrl = '';
+        if (post._embedded && post._embedded['wp:featuredmedia'] && post._embedded['wp:featuredmedia'][0]) {
+          imageUrl = post._embedded['wp:featuredmedia'][0].source_url;
+        }
+
+        return {
+          title: post.title.rendered,
+          description: post.excerpt.rendered.replace(/<[^>]*>?/gm, ''), // Strip HTML tags
+          url: post.link,
+          urlToImage: imageUrl,
+          publishedAt: post.date,
+          source: { name: 'StartupByDoc' },
+          author: post._embedded?.author?.[0]?.name || 'StartupByDoc Team'
+        };
+      });
+    } catch (error) {
+      console.error('Error fetching StartupByDoc news:', error);
+      return [];
+    }
+  }
+
   async getStartupNews(date?: string, region: 'global' | 'india' = 'global'): Promise<NewsArticle[]> {
     const isDev = import.meta.env.DEV;
     
@@ -87,11 +117,18 @@ class NewsService {
           }));
         }) : Promise.resolve([]);
 
-        const [newsApiResult, newsDataResult] = await Promise.allSettled([newsApiPromise, newsDataPromise]);
+        const startupByDocPromise = this.getStartupByDocNews();
+
+        const [newsApiResult, newsDataResult, startupByDocResult] = await Promise.allSettled([
+          newsApiPromise, 
+          newsDataPromise,
+          startupByDocPromise
+        ]);
         
         let combinedArticles: any[] = [];
         if (newsApiResult.status === 'fulfilled') combinedArticles = [...combinedArticles, ...newsApiResult.value];
         if (newsDataResult.status === 'fulfilled') combinedArticles = [...combinedArticles, ...newsDataResult.value];
+        if (startupByDocResult.status === 'fulfilled') combinedArticles = [...combinedArticles, ...startupByDocResult.value];
         
         combinedArticles.sort((a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime());
         return combinedArticles;

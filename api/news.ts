@@ -61,8 +61,36 @@ export default async function handler(req: any, res: any) {
       }));
     }) : Promise.resolve([]);
 
-    // Run both concurrently
-    const [newsApiResult, newsDataResult] = await Promise.allSettled([newsApiPromise, newsDataPromise]);
+    // 3. Fetch from StartupByDoc (WordPress REST API)
+    const startupByDocPromise = axios.get('https://startupbydoc.com/wp-json/wp/v2/posts?_embed&per_page=10', {
+      headers: { 'User-Agent': 'Innovestor-Copilot-App' }
+    }).then(res => {
+      const posts = res.data || [];
+      return posts.map((post: any) => {
+        let imageUrl = '';
+        if (post._embedded && post._embedded['wp:featuredmedia'] && post._embedded['wp:featuredmedia'][0]) {
+          imageUrl = post._embedded['wp:featuredmedia'][0].source_url;
+        }
+        return {
+          title: post.title.rendered,
+          description: post.excerpt.rendered.replace(/<[^>]*>?/gm, ''),
+          url: post.link,
+          urlToImage: imageUrl,
+          publishedAt: post.date,
+          source: { name: 'StartupByDoc' }
+        };
+      });
+    }).catch(err => {
+      console.error('StartupByDoc Error:', err.message);
+      return [];
+    });
+
+    // Run all concurrently
+    const [newsApiResult, newsDataResult, startupByDocResult] = await Promise.allSettled([
+      newsApiPromise, 
+      newsDataPromise,
+      startupByDocPromise
+    ]);
 
     let combinedArticles: any[] = [];
     if (newsApiResult.status === 'fulfilled') {
@@ -70,6 +98,9 @@ export default async function handler(req: any, res: any) {
     }
     if (newsDataResult.status === 'fulfilled') {
       combinedArticles = [...combinedArticles, ...newsDataResult.value];
+    }
+    if (startupByDocResult.status === 'fulfilled') {
+      combinedArticles = [...combinedArticles, ...startupByDocResult.value];
     }
 
     // Sort combined articles by date descending
