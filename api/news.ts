@@ -1,6 +1,8 @@
 import axios from 'axios';
 
-export default async function handler(req: any, res: any) {
+import { VercelRequest, VercelResponse } from '@vercel/node';
+
+export default async function handler(req: VercelRequest, res: VercelResponse) {
   // Extract API key from environment variables
   // Vercel handles secrets via process.env
   const apiKey = process.env.VITE_NEWSAPI_API_KEY || process.env.NEWSAPI_API_KEY;
@@ -34,7 +36,7 @@ export default async function handler(req: any, res: any) {
     }).then(res => res.data.articles || []) : Promise.resolve([]);
 
     // 2. Fetch from NewsData.io
-    const newsDataParams: any = {
+    const newsDataParams: Record<string, string | number | undefined> = {
       apikey: newsDataKey,
       q: 'startup AND (funding OR growth OR ecosystem)',
       language: 'en',
@@ -49,7 +51,14 @@ export default async function handler(req: any, res: any) {
       params: newsDataParams
     }).then(res => {
       const results = res.data.results || [];
-      return results.map((item: any) => ({
+      return results.map((item: {
+        title: string;
+        description: string;
+        link: string;
+        image_url: string;
+        pubDate: string;
+        source_id: string;
+      }) => ({
         title: item.title,
         description: item.description,
         url: item.link,
@@ -66,9 +75,17 @@ export default async function handler(req: any, res: any) {
       headers: { 'User-Agent': 'Innovestor-Copilot-App' }
     }).then(res => {
       const posts = res.data || [];
-      return posts.map((post: any) => {
+      return posts.map((post: {
+        _embedded?: {
+          'wp:featuredmedia'?: Array<{ source_url: string }>;
+        };
+        title: { rendered: string };
+        excerpt: { rendered: string };
+        link: string;
+        date: string;
+      }) => {
         let imageUrl = '';
-        if (post._embedded && post._embedded['wp:featuredmedia'] && post._embedded['wp:featuredmedia'][0]) {
+        if (post._embedded?.['wp:featuredmedia']?.[0]) {
           imageUrl = post._embedded['wp:featuredmedia'][0].source_url;
         }
         return {

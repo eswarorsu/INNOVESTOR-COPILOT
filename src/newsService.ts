@@ -22,10 +22,19 @@ class NewsService {
       const response = await axios.get('https://startupbydoc.com/wp-json/wp/v2/posts?_embed&per_page=10');
       const posts = response.data;
       
-      return posts.map((post: any) => {
+      return posts.map((post: {
+        _embedded?: {
+          'wp:featuredmedia'?: Array<{ source_url: string }>;
+          author?: Array<{ name: string }>;
+        };
+        title: { rendered: string };
+        excerpt: { rendered: string };
+        link: string;
+        date: string;
+      }) => {
         // Extract featured image if available
         let imageUrl = '';
-        if (post._embedded && post._embedded['wp:featuredmedia'] && post._embedded['wp:featuredmedia'][0]) {
+        if (post._embedded?.['wp:featuredmedia']?.[0]) {
           imageUrl = post._embedded['wp:featuredmedia'][0].source_url;
         }
 
@@ -51,7 +60,7 @@ class NewsService {
     try {
       let response;
       
-      const params: any = {
+      const params: Record<string, string | number> = {
         q: '("startup" OR "founder") AND ("growth" OR "scale" OR "unicorn" OR "funding" OR "venture capital" OR "seed round" OR "strategy" OR "failure" OR "pivot" OR "ecosystem" OR "buildinpublic")',
         sortBy: 'relevancy',
         language: 'en',
@@ -64,7 +73,7 @@ class NewsService {
         params.to = date;
       }
 
-      const proxyParams: any = {};
+      const proxyParams: Record<string, string> = {};
       if (date) {
         proxyParams.date = date;
       }
@@ -93,7 +102,7 @@ class NewsService {
           }
         }).then(res => res.data.articles || []) : Promise.resolve([]);
 
-        const newsDataParams: any = {
+        const newsDataParams: Record<string, string | number> = {
           apikey: newsDataKey,
           q: 'startup AND (funding OR growth OR ecosystem)',
           language: 'en',
@@ -107,7 +116,14 @@ class NewsService {
         const newsDataPromise = newsDataKey ? axios.get('https://newsdata.io/api/1/news', {
           params: newsDataParams
         }).then(res => {
-          return (res.data.results || []).map((item: any) => ({
+          return (res.data.results || []).map((item: {
+            title: string;
+            description: string;
+            link: string;
+            image_url: string;
+            pubDate: string;
+            source_id: string;
+          }) => ({
             title: item.title,
             description: item.description,
             url: item.link,
@@ -125,7 +141,7 @@ class NewsService {
           startupByDocPromise
         ]);
         
-        let combinedArticles: any[] = [];
+        let combinedArticles: NewsArticle[] = [];
         if (newsApiResult.status === 'fulfilled') combinedArticles = [...combinedArticles, ...newsApiResult.value];
         if (newsDataResult.status === 'fulfilled') combinedArticles = [...combinedArticles, ...newsDataResult.value];
         if (startupByDocResult.status === 'fulfilled') combinedArticles = [...combinedArticles, ...startupByDocResult.value];
