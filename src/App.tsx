@@ -1,6 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { Trash2, Zap, Paperclip, Mic, ChevronDown, Database, Download } from 'lucide-react';
+import { Trash2, Zap, Paperclip, Mic, ChevronDown, Database, Download, LogIn, LogOut, User as UserIcon } from 'lucide-react';
+import { supabase } from './supabase';
+import AuthModal from './components/AuthModal';
+import type { User } from '@supabase/supabase-js';
 
 import type { Message, AgentMode } from './types';
 import { GROQ_MODELS, groqService, type GroqModel } from './groqService';
@@ -47,6 +50,9 @@ const App: React.FC = () => {
   const [toast, setToast] = useState('');
   const [view, setView] = useState<'copilot' | 'news'>('copilot');
   const [installPrompt, setInstallPrompt] = useState<any>(null);
+  const [user, setUser] = useState<User | null>(null);
+  const [showAuthModal, setShowAuthModal] = useState(false);
+  const [guestUsageCount, setGuestUsageCount] = useState<number>(0);
 
   const chatEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -71,6 +77,22 @@ const App: React.FC = () => {
     return () => window.removeEventListener('beforeinstallprompt', handleBefore);
   }, []);
 
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUser(session?.user ?? null);
+    });
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+    });
+
+    // Load guest usage from localStorage
+    const savedUsage = localStorage.getItem('innovestor_guest_usage');
+    setGuestUsageCount(savedUsage ? (Number(savedUsage) || 0) : 0);
+
+    return () => subscription.unsubscribe();
+  }, []);
+
   const handleInstall = async () => {
     if (!installPrompt) return;
     installPrompt.prompt();
@@ -79,6 +101,11 @@ const App: React.FC = () => {
       setInstallPrompt(null);
       showToast('Installing Innovestor...');
     }
+  };
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    showToast('Logged out');
   };
 
 
@@ -100,6 +127,14 @@ const App: React.FC = () => {
     const content = typeof customText === 'string' ? customText : input.trim();
     if (!content || isStreaming) return;
 
+    // Guests limited to 3 queries; logged-in users have unlimited access
+    const GUEST_LIMIT = 3;
+    if (!user && guestUsageCount >= GUEST_LIMIT) {
+      setShowAuthModal(true);
+      showToast('Login to continue using our AI agent');
+      return;
+    }
+
     const userMsg: Message = {
       id: (typeof crypto !== 'undefined' && crypto.randomUUID) ? crypto.randomUUID() : Math.random().toString(36).substring(2),
       role: 'user',
@@ -109,6 +144,14 @@ const App: React.FC = () => {
     };
 
     setMessages((prev) => [...prev, userMsg]);
+
+    // Track guest usage in localStorage only
+    if (!user) {
+      const next = guestUsageCount + 1;
+      setGuestUsageCount(next);
+      localStorage.setItem('innovestor_guest_usage', next.toString());
+    }
+
     setInput('');
     setShowTyping(true);
     setIsStreaming(true);
@@ -236,6 +279,32 @@ const App: React.FC = () => {
           </div>
 
           <div className="topbar-right">
+            {user ? (
+              <div className="flex items-center gap-2">
+                <div className="topbar-mode-badge user-badge" title={user.email}>
+                  <UserIcon size={14} />
+                  <span>{user.email?.split('@')[0]}</span>
+                </div>
+                <button 
+                  className="login-btn floating-action" 
+                  onClick={handleLogout}
+                  id="logout-topbar-btn"
+                  title="Logout"
+                >
+                  <LogOut size={14} />
+                </button>
+              </div>
+            ) : (
+              <button 
+                className="login-btn floating-action" 
+                onClick={() => setShowAuthModal(true)}
+                id="login-topbar-btn"
+              >
+                <LogIn size={14} />
+                <span>Login</span>
+              </button>
+            )}
+
             <button 
               className="clear-btn" 
               onClick={clearChat} 
@@ -408,6 +477,16 @@ const App: React.FC = () => {
           </AnimatePresence>
         </div>
       </div>
+
+      <AuthModal 
+        isOpen={showAuthModal} 
+        onClose={() => setShowAuthModal(false)} 
+        onSuccess={(u) => {
+          showToast(`Welcome back, ${u.email?.split('@')[0]}`);
+        }}
+      />
+
+
 
       <AnimatePresence>
         {toast && (
