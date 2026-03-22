@@ -225,7 +225,7 @@ const App: React.FC = () => {
 
   const handleSuggestion = (text: string) => {
     setInput(text);
-    handleSend(text);
+        handleSend(text);
   };
 
   const activeModelInfo = GROQ_MODELS.find((m) => m.id === activeModel);
@@ -252,6 +252,18 @@ const App: React.FC = () => {
               <Zap size={10} style={{ marginRight: '4px' }} />
               {activeModelInfo?.label}
             </div>
+          </div>
+
+          <div className="mobile-top-auth">
+            {user ? (
+               <button className="mobile-auth-btn" onClick={handleLogout} title="Logout">
+                 <div className="user-avatar-mini">{user.email?.charAt(0).toUpperCase()}</div>
+               </button>
+            ) : (
+               <button className="mobile-auth-btn" onClick={() => setShowAuthModal(true)}>
+                 <LogIn size={18} />
+               </button>
+            )}
           </div>
 
           <div className="topbar-switcher-wrapper">
@@ -439,7 +451,6 @@ const App: React.FC = () => {
                       disabled={!input.trim() || isStreaming}
                     >
                       <div className="voice-wave">
-                        <div className="wave-bar" />
                         <div className="wave-bar" />
                         <div className="wave-bar" />
                       </div>

@@ -1766,6 +1766,11 @@ body {
   to { opacity: 1; transform: translateX(-50%) translateY(0); }
 }
 
+/* ─── Mobile Only Elements (Hidden by default) ────────────── */
+.mobile-only-mode, .mobile-top-auth {
+  display: none;
+}
+
 /* ═══════════════════════════════════════════════════════════════
    MOBILE RESPONSIVE — Comfortable, readable, tap-friendly UI
    ═══════════════════════════════════════════════════════════════ */
@@ -1773,48 +1778,109 @@ body {
 
   /* ── Topbar: single clean row ─────────────────────────────── */
   .topbar {
+    position: absolute;
+    top: 15px;
+    left: 0;
+    right: 0;
     display: flex;
-    flex-wrap: wrap;
     align-items: center;
-    height: auto;
-    padding: 10px 14px;
-    gap: 10px;
+    justify-content: space-between;
     background: transparent;
-    border-bottom: none;
-    position: sticky;
-    top: 0;
+    border: none;
     z-index: 1000;
+    padding: 0 8px;
+    pointer-events: none;
   }
 
-  .topbar-left {
-    order: 1;
-    flex: 1;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-
-  .topbar-right {
-    order: 2;
-    display: flex;
-    align-items: center;
-    gap: 8px;
+  .topbar-left, .topbar-right {
+    display: none !important;
   }
 
   .topbar-switcher-wrapper {
-    order: 3;
-    width: 100%;
-    position: relative;
-    left: auto;
-    transform: none;
-    margin: 4px 0 2px;
+    pointer-events: auto;
+    width: auto;
+    border-radius: 99px;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    margin-left: 0;
   }
 
   .topbar-switcher {
+    width: auto;
+    max-width: 180px; /* Even smaller to avoid overlap */
+    margin: 0;
+    height: 28px; /* Micro height */
+    background: rgba(15, 15, 18, 0.6);
+    backdrop-filter: blur(15px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    border-radius: 99px;
+    padding: 1px;
+  }
+
+  .switcher-btn {
+    flex: 1;
+    padding: 2px 8px; /* Tighter padding */
+  }
+
+  .switcher-btn-content {
+    font-size: 10.5px; /* compact but readable */
+    gap: 0;
+  }
+
+  .switcher-btn-content svg {
+    display: none; /* REMOVE icons to save space on mobile */
+  }
+
+  .switcher-btn-content span {
+    font-size: 10.5px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+
+  .mobile-top-auth {
+    display: block;
+    position: absolute;
+    right: 8px; /* Tighter corner positioning */
+    top: 15px;
+    pointer-events: auto;
+    z-index: 1001;
+  }
+
+  .mobile-auth-btn {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+  }
+
+  .user-avatar-mini {
     width: 100%;
-    max-width: 360px;
-    margin: 0 auto;
-    height: 42px;           /* Taller = easier to tap */
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    font-weight: 800;
+    background: var(--accent-gradient);
+    border-radius: 50%;
+  }
+
+  .topbar-switcher {
+    width: auto;
+    max-width: none;
+    margin: 0;
+    height: 38px;
   }
 
   .switcher-btn {
@@ -1972,6 +2038,8 @@ body {
     width: 18px;
     height: 18px;
   }
+
+
 
   /* Model selector badge */
   .auto-badge {
@@ -2205,21 +2273,11 @@ body {
   }
 
   .topbar {
-    padding: 8px 12px;
-    gap: 8px;
+    top: 10px;
   }
 
-  /* Hide badge text on tiny screens to keep topbar clean */
-  .topbar-mode-badge span {
-    display: none;
-  }
-
-  .topbar-mode-badge {
-    padding: 6px 10px;
-  }
-
-  .topbar-model-badge {
-    display: none;          /* Save space on very small screens */
+  .topbar-mode-badge, .topbar-model-badge {
+    display: none !important;
   }
 
   /* Input stays at 16px minimum — prevents iOS zoom */

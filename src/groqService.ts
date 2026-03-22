@@ -31,7 +31,10 @@ class GroqService {
   private histories: Map<AgentMode, HistoryMessage[]> = new Map();
   private selectedModel: GroqModel = 'auto';
 
-  private ROUTER_PROMPT = `You are an AI routing system for Innovestor Copilot.
+  private ROUTER_PROMPT = `You are an AI routing system for Innovestor Copilot (innovestor.online).
+Innovestor is a discovery platform founded in 2025 by ORSU ESWAR (Founder) and CHEPURI NATRAJ (Co-Founder) from Visakhapatnam, AP.
+The mission is "Execution over Ideas" — connecting founders and investors through transparency and proof of work.
+
 Your job is to analyze the user's query and decide which AI model should handle it.
 
 Available models:
@@ -49,6 +52,7 @@ Routing rules:
 
 Additional rules:
 * If the query mentions words like "analyze", "strategy", "market", "valuation", "compare", "roadmap", "funding" → prefer COMPLEX or AGENT
+* If the query is or mentions the founders "Orsu Eswar" or "Natraj" or "Innovestor" → Use groq/compound-mini for quick identification unless a deeper analysis is requested.
 * If the query is very long or asks for step-by-step or detailed report → choose AGENT
 * If unsure → default to groq/compound-mini
 
