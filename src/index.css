@@ -1778,18 +1778,18 @@ body {
 
   /* ── Topbar: single clean row ─────────────────────────────── */
   .topbar {
-    position: absolute;
-    top: 15px;
+    position: relative;
+    top: 0;
     left: 0;
     right: 0;
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    justify-content: center;
     background: transparent;
     border: none;
     z-index: 1000;
-    padding: 0 8px;
-    pointer-events: none;
+    padding: 15px 8px 5px;
+    pointer-events: auto;
   }
 
   .topbar-left, .topbar-right {
@@ -1798,12 +1798,13 @@ body {
 
   .topbar-switcher-wrapper {
     pointer-events: auto;
-    width: auto;
+    width: 100%;
     border-radius: 99px;
     padding: 0;
     display: flex;
-    flex-direction: column;
-    align-items: flex-start;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
     margin-left: 0;
   }
 
@@ -1929,17 +1930,20 @@ body {
 
   /* ── Welcome Screen ───────────────────────────────────────── */
   .welcome-screen {
-    padding: 24px 20px;
+    padding: 10px 20px;
     align-items: center;
-    justify-content: center !important;
-    min-height: calc(100vh - 130px);
+    justify-content: center;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 70vh; /* Occupy center area */
   }
 
   .welcome-logo {
-    width: 68px;
-    height: 68px;
-    border-radius: 18px;
-    margin-bottom: 20px;
+    width: 65px;
+    height: 65px;
+    border-radius: 16px;
+    margin-bottom: 15px;
     margin-top: 0;
   }
 
