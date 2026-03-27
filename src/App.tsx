@@ -1,13 +1,13 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { Trash2, Zap, Paperclip, Mic, ChevronDown, Database, Download, LogIn, LogOut, User as UserIcon } from 'lucide-react';
+import { Trash2, Zap, Paperclip, Mic, ChevronDown, Database, Download, LogIn, LogOut, User as UserIcon, Menu } from 'lucide-react';
 import { supabase } from './supabase';
 import AuthModal from './components/AuthModal';
 import type { User } from '@supabase/supabase-js';
 
 import type { Message, AgentMode } from './types';
 import { GROQ_MODELS, groqService, type GroqModel } from './groqService';
-import { getMode } from './agentModes';
+import { getMode, AGENT_MODES } from './agentModes';
 
 // Components
 import MessageItem from './components/MessageItem';
@@ -53,6 +53,7 @@ const App: React.FC = () => {
   const [user, setUser] = useState<User | null>(null);
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [guestUsageCount, setGuestUsageCount] = useState<number>(0);
+  const [showMobileModePicker, setShowMobileModePicker] = useState(false);
 
   const chatEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -267,6 +268,15 @@ const App: React.FC = () => {
           </div>
 
           <div className="topbar-switcher-wrapper">
+            {/* Mobile-only: 3-lines button to open agent mode picker */}
+            <button
+              className="mobile-mode-menu-btn"
+              onClick={() => setShowMobileModePicker(true)}
+              id="mobile-mode-menu-btn"
+              title="Choose Agent Mode"
+            >
+              <Menu size={18} />
+            </button>
             <div className="topbar-switcher">
               <button 
                 className={`switcher-btn ${view === 'copilot' ? 'active' : ''}`}
@@ -498,6 +508,50 @@ const App: React.FC = () => {
       />
 
 
+
+      {/* Mobile Agent Mode Picker Overlay */}
+      <AnimatePresence>
+        {showMobileModePicker && (
+          <motion.div
+            className="mobile-mode-picker-overlay"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setShowMobileModePicker(false)}
+          >
+            <motion.div
+              className="mobile-mode-picker-panel"
+              initial={{ opacity: 0, y: 30, scale: 0.95 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 30, scale: 0.95 }}
+              transition={{ type: 'spring', stiffness: 320, damping: 28 }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="mobile-mode-picker-header">
+                <span className="mobile-mode-picker-title">CHOOSE AGENT MODE</span>
+                <button className="mobile-mode-picker-close" onClick={() => setShowMobileModePicker(false)}>✕</button>
+              </div>
+              <div className="dropdown-grid">
+                {AGENT_MODES.map((m) => (
+                  <button
+                    key={m.id}
+                    className={`dropdown-item ${activeMode === m.id ? 'active' : ''}`}
+                    onClick={() => { handleModeChange(m.id); setShowMobileModePicker(false); }}
+                  >
+                    <div className="item-icon-circle" style={{ background: `${m.color}15`, color: m.color }}>
+                      <DynamicIcon name={m.icon} size={16} />
+                    </div>
+                    <div className="item-text">
+                      <span className="item-name">{m.label}</span>
+                      <span className="item-desc">{m.description}</span>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       <AnimatePresence>
         {toast && (

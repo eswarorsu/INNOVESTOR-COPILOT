@@ -41,7 +41,7 @@ const WelcomeScreen: React.FC<WelcomeProps> = ({ mode, onModeChange }) => {
       Your AI-powered agent for startups, fundraising & investment intelligence. Supercharged by <span style={{ color: '#f97316', fontWeight: 600 }}>Groq LPU™</span>.
     </motion.p>
     
-    <div className="mode-selector-container">
+    <div className="mode-selector-container mobile-hide-modes">
       <motion.button 
         className="welcome-mode-highlight clickable"
         initial={{ opacity: 0, y: 5 }}
