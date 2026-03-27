@@ -212,13 +212,21 @@ CRITICAL FORMATTING RULES:
         return;
       }
 
+      // Map pseudo-models to actual high-speed Groq models to ensure rapid inference
+      const modelMapping: Record<string, string> = {
+        'groq/compound': 'llama-3.3-70b-versatile',
+        'groq/compound-mini': 'llama-3.1-8b-instant',
+        'auto': 'llama-3.1-8b-instant'
+      };
+      const mappedModel = modelMapping[finalModel] || finalModel;
+
       const stream = await this.client.chat.completions.create({
-        model: finalModel === 'auto' ? 'groq/compound-mini' : finalModel,
+        model: mappedModel,
         messages,
         stream: true,
-        temperature: 0.8,
-        max_tokens: 4096,
-        top_p: 0.95,
+        temperature: 0.2, // Lowered from 0.8 for highly accurate responses
+        max_tokens: 3000, // Reduced for faster completion and fewer long timeouts
+        top_p: 0.85,      // Tighter sampling for precise answers
       });
 
       let fullResponse = '';
