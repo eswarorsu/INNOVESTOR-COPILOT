@@ -1,0 +1,513 @@
+import React, { useState, useEffect, useRef } from 'react';
+import { AnimatePresence, motion } from 'framer-motion';
+import { Trash2, Zap, Paperclip, Mic, ChevronDown, Database, Download, LogIn, LogOut, User as UserIcon } from 'lucide-react';
+import { supabase } from './supabase';
+import AuthModal from './components/AuthModal';
+import type { User } from '@supabase/supabase-js';
+
+import type { Message, AgentMode } from './types';
+import { GROQ_MODELS, groqService, type GroqModel } from './groqService';
+import { getMode } from './agentModes';
+
+// Components
+import MessageItem from './components/MessageItem';
+import WelcomeScreen from './components/WelcomeScreen';
+import AnimatedLogo from './components/AnimatedLogo';
+import DynamicIcon from './components/DynamicIcon';
+import NewsSection from './components/NewsSection';
+import { Newspaper, MessageSquare } from 'lucide-react';
+
+/* ─── Typing Indicator ──────────────────────────────────────── */
+const TypingIndicator: React.FC = () => (
+  <motion.div 
+    className="message-wrapper ai"
+    initial={{ opacity: 0, y: 5 }}
+    animate={{ opacity: 1, y: 0 }}
+  >
+    <div className="message-avatar ai">
+      <AnimatedLogo isThinking={true} size={28} />
+    </div>
+    <div className="message-body">
+      <div className="message-meta"><span>Copilot</span><span>thinking…</span></div>
+      <div className="message-bubble ai">
+        <div className="typing-indicator-text">
+          Innovestor Copilot is processing your request...
+        </div>
+      </div>
+    </div>
+  </motion.div>
+);
+
+/* ─── Main App ──────────────────────────────────────────────── */
+const App: React.FC = () => {
+  const [activeMode, setActiveMode] = useState<AgentMode>('general');
+  const [activeModel, setActiveModel] = useState<GroqModel>(groqService.getModel());
+  const [showModelSelector, setShowModelSelector] = useState(false);
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [input, setInput] = useState('');
+  const [isStreaming, setIsStreaming] = useState(false);
+  const [showTyping, setShowTyping] = useState(false);
+  const [toast, setToast] = useState('');
+  const [view, setView] = useState<'copilot' | 'news'>('copilot');
+  const [installPrompt, setInstallPrompt] = useState<any>(null);
+  const [user, setUser] = useState<User | null>(null);
+  const [showAuthModal, setShowAuthModal] = useState(false);
+  const [guestUsageCount, setGuestUsageCount] = useState<number>(0);
+
+  const chatEndRef = useRef<HTMLDivElement>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  const currentMode = getMode(activeMode);
+
+  const showToast = (msg: string) => {
+    setToast(msg);
+    setTimeout(() => setToast(''), 2500);
+  };
+
+  useEffect(() => {
+    chatEndRef.current?.scrollIntoView({ behavior: 'auto' });
+  }, [messages, showTyping]);
+
+  useEffect(() => {
+    const handleBefore = (e: any) => {
+      e.preventDefault();
+      setInstallPrompt(e);
+    };
+    window.addEventListener('beforeinstallprompt', handleBefore);
+    return () => window.removeEventListener('beforeinstallprompt', handleBefore);
+  }, []);
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUser(session?.user ?? null);
+    });
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+    });
+
+    // Load guest usage from localStorage
+    const savedUsage = localStorage.getItem('innovestor_guest_usage');
+    setGuestUsageCount(savedUsage ? (Number(savedUsage) || 0) : 0);
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  const handleInstall = async () => {
+    if (!installPrompt) return;
+    installPrompt.prompt();
+    const { outcome } = await installPrompt.userChoice;
+    if (outcome === 'accepted') {
+      setInstallPrompt(null);
+      showToast('Installing Innovestor...');
+    }
+  };
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    showToast('Logged out');
+  };
+
+
+  const handleModeChange = (mode: AgentMode) => {
+    setActiveMode(mode);
+    setMessages([]);
+  };
+
+  const handleModelChange = (model: GroqModel) => {
+    setActiveModel(model);
+    groqService.setModel(model);
+    groqService.clearAllSessions();
+    setMessages([]);
+    const m = GROQ_MODELS.find((x) => x.id === model);
+    showToast(`Model: ${m?.label ?? model}`);
+  };
+
+  const handleSend = async (customText?: string) => {
+    const content = typeof customText === 'string' ? customText : input.trim();
+    if (!content || isStreaming) return;
+
+    // Guests limited to 3 queries; logged-in users have unlimited access
+    const GUEST_LIMIT = 3;
+    if (!user && guestUsageCount >= GUEST_LIMIT) {
+      setShowAuthModal(true);
+      showToast('Login to continue using our AI agent');
+      return;
+    }
+
+    const userMsg: Message = {
+      id: (typeof crypto !== 'undefined' && crypto.randomUUID) ? crypto.randomUUID() : Math.random().toString(36).substring(2),
+      role: 'user',
+      content,
+      timestamp: new Date(),
+      mode: activeMode,
+    };
+
+    setMessages((prev) => [...prev, userMsg]);
+
+    // Track guest usage in localStorage only
+    if (!user) {
+      const next = guestUsageCount + 1;
+      setGuestUsageCount(next);
+      localStorage.setItem('innovestor_guest_usage', next.toString());
+    }
+
+    setInput('');
+    setShowTyping(true);
+    setIsStreaming(true);
+
+    if (textareaRef.current) {
+      textareaRef.current.style.height = 'auto';
+    }
+
+    await new Promise((r) => setTimeout(r, 400));
+    setShowTyping(false);
+
+    const aiMsgId = (typeof crypto !== 'undefined' && crypto.randomUUID) ? crypto.randomUUID() : Math.random().toString(36).substring(2);
+    const aiMsg: Message = {
+      id: aiMsgId,
+      role: 'model',
+      content: '',
+      timestamp: new Date(),
+      mode: activeMode,
+      isStreaming: true,
+    };
+    setMessages((prev) => [...prev, aiMsg]);
+
+    groqService.sendMessageStream(
+      content,
+      activeMode,
+      (chunk) => {
+        setMessages((prev) =>
+          prev.map((m) => m.id === aiMsgId ? { ...m, content: m.content + chunk } : m)
+        );
+      },
+      () => {
+        setMessages((prev) =>
+          prev.map((m) => m.id === aiMsgId ? { ...m, isStreaming: false } : m)
+        );
+        setIsStreaming(false);
+      },
+      (err) => {
+        setMessages((prev) =>
+          prev.map((m) =>
+            m.id === aiMsgId
+              ? { ...m, content: `⚠ **Error:** ${err}`, isStreaming: false }
+              : m
+          )
+        );
+        setIsStreaming(false);
+        setShowTyping(false);
+        showToast('Error from Groq. Check your API key.');
+      }
+    );
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      handleSend();
+    }
+  };
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setInput(e.target.value);
+    const ta = e.target;
+    ta.style.height = 'auto';
+    ta.style.height = `${Math.min(ta.scrollHeight, 180)}px`;
+  };
+
+  const clearChat = () => {
+    setMessages([]);
+    groqService.clearSession(activeMode);
+    showToast('Conversation cleared');
+  };
+
+  const handleSuggestion = (text: string) => {
+    setInput(text);
+        handleSend(text);
+  };
+
+  const activeModelInfo = GROQ_MODELS.find((m) => m.id === activeModel);
+
+  return (
+    <div className="app-layout">
+      {/* Space Background */}
+      <div className="stars-container">
+        <div className="star-layer star-layer-1"></div>
+        <div className="star-layer star-layer-2"></div>
+        <div className="star-layer star-layer-3"></div>
+      </div>
+
+      <div className="main-area">
+        {/* Top Bar */}
+        <div className="topbar">
+          <div className="topbar-left">
+            <div className="topbar-mode-badge">
+              <div className="topbar-mode-dot" style={{ background: currentMode.color }} />
+              <DynamicIcon name={currentMode.icon} size={14} color={currentMode.color} style={{ marginRight: '6px' }} />
+              <span>{currentMode.label}</span>
+            </div>
+            <div className="topbar-model-badge" title={activeModelInfo?.description}>
+              <Zap size={10} style={{ marginRight: '4px' }} />
+              {activeModelInfo?.label}
+            </div>
+          </div>
+
+          <div className="mobile-top-auth">
+            {user ? (
+               <button className="mobile-auth-btn" onClick={handleLogout} title="Logout">
+                 <div className="user-avatar-mini">{user.email?.charAt(0).toUpperCase()}</div>
+               </button>
+            ) : (
+               <button className="mobile-auth-btn" onClick={() => setShowAuthModal(true)}>
+                 <LogIn size={18} />
+               </button>
+            )}
+          </div>
+
+          <div className="topbar-switcher-wrapper">
+            <div className="topbar-switcher">
+              <button 
+                className={`switcher-btn ${view === 'copilot' ? 'active' : ''}`}
+                onClick={() => setView('copilot')}
+              >
+                <div className="switcher-btn-content">
+                  <MessageSquare size={14} />
+                  <span>Innovestor Copilot</span>
+                </div>
+              </button>
+              <button 
+                className={`switcher-btn ${view === 'news' ? 'active' : ''}`}
+                onClick={() => setView('news')}
+              >
+                <div className="switcher-btn-content">
+                  <Newspaper size={14} />
+                  <span>Startup News AI</span>
+                </div>
+              </button>
+              <div className="switcher-pill-bg" style={{ left: view === 'copilot' ? '4px' : 'calc(50% + 2px)' }} />
+            </div>
+          </div>
+
+          <div className="topbar-right">
+            {user ? (
+              <div className="flex items-center gap-2">
+                <div className="topbar-mode-badge user-badge" title={user.email}>
+                  <UserIcon size={14} />
+                  <span>{user.email?.split('@')[0]}</span>
+                </div>
+                <button 
+                  className="login-btn floating-action" 
+                  onClick={handleLogout}
+                  id="logout-topbar-btn"
+                  title="Logout"
+                >
+                  <LogOut size={14} />
+                </button>
+              </div>
+            ) : (
+              <button 
+                className="login-btn floating-action" 
+                onClick={() => setShowAuthModal(true)}
+                id="login-topbar-btn"
+              >
+                <LogIn size={14} />
+                <span>Login</span>
+              </button>
+            )}
+
+            <button 
+              className="clear-btn" 
+              onClick={clearChat} 
+              id="clear-chat-btn" 
+              disabled={messages.length === 0}
+            >
+              <Trash2 size={14} />
+              <span>Clear</span>
+            </button>
+
+            {installPrompt && (
+              <button 
+                className="clear-btn pwa-badge" 
+                onClick={handleInstall} 
+                id="pwa-install-topbar-btn"
+                style={{ 
+                  background: 'var(--accent-gradient)', 
+                  borderColor: 'transparent',
+                  color: 'white'
+                }}
+              >
+                <Download size={14} />
+                <span>Install App</span>
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* View Container */}
+        <div className="view-container">
+          <AnimatePresence mode="wait">
+            {view === 'copilot' ? (
+              <motion.div 
+                key="copilot-view"
+                className="view-content"
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -20 }}
+                transition={{ duration: 0.3 }}
+              >
+                <div className="chat-area">
+                  <AnimatePresence mode="wait">
+                    {messages.length === 0 && !showTyping ? (
+                      <motion.div
+                        key={activeMode}
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        transition={{ duration: 0.3 }}
+                        style={{ width: '100%' }}
+                      >
+                        <WelcomeScreen mode={currentMode} onModeChange={handleModeChange} />
+                      </motion.div>
+                    ) : (
+                      <motion.div
+                        key="chat-flow"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        style={{ width: '100%' }}
+                      >
+                        {messages.map((m) => <MessageItem key={m.id} message={m} />)}
+                        {showTyping && <TypingIndicator />}
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                  <div ref={chatEndRef} />
+                </div>
+
+                <div className={`input-area ${messages.length === 0 ? 'centered' : ''}`}>
+                  <div className="input-container">
+                    <button className="input-action-btn" title="Attach file">
+                      <Paperclip size={18} />
+                    </button>
+                    <textarea
+                      ref={textareaRef}
+                      className="chat-input"
+                      placeholder="What's on your mind?"
+                      value={input}
+                      onChange={handleInputChange}
+                      onKeyDown={handleKeyDown}
+                      rows={1}
+                      disabled={isStreaming}
+                      id="chat-input"
+                    />
+                    
+                    <div className="model-selector-wrapper">
+                      <button 
+                        className="auto-badge" 
+                        onClick={() => setShowModelSelector(!showModelSelector)}
+                      >
+                        <span className="model-btn-text">AI Models</span> <ChevronDown size={14} />
+                      </button>
+                      
+                      <AnimatePresence>
+                        {showModelSelector && (
+                          <motion.div 
+                            className="model-dropdown-popover"
+                            initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                            animate={{ opacity: 1, y: 0, scale: 1 }}
+                            exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                          >
+                            <div className="popover-header">AI MODEL</div>
+                            <div className="popover-list">
+                              {GROQ_MODELS.map((model) => (
+                                <button
+                                  key={model.id}
+                                  className={`popover-item ${activeModel === model.id ? 'active' : ''}`}
+                                  onClick={() => {
+                                    handleModelChange(model.id);
+                                    setShowModelSelector(false);
+                                  }}
+                                >
+                                  <div className="item-main">
+                                    <Database size={16} />
+                                    <span className="item-label">{model.label}</span>
+                                  </div>
+                                </button>
+                              ))}
+                            </div>
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
+                    </div>
+
+                    <button className="input-action-btn">
+                      <Mic size={18} />
+                    </button>
+
+                    <button
+                      className="send-btn-circle"
+                      onClick={() => handleSend()}
+                      disabled={!input.trim() || isStreaming}
+                    >
+                      <div className="voice-wave">
+                        <div className="wave-bar" />
+                        <div className="wave-bar" />
+                      </div>
+                    </button>
+                  </div>
+
+                  <AnimatePresence>
+                    {messages.length === 0 && (
+                      <motion.div className="landed-suggestions">
+                        {currentMode.suggestedPrompts.slice(0, 4).map((prompt, idx) => (
+                          <button 
+                            key={idx} 
+                            className="landed-suggestion-btn"
+                            onClick={() => handleSuggestion(prompt)}
+                          >
+                            {prompt}
+                          </button>
+                        ))}
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+              </motion.div>
+            ) : (
+              <motion.div 
+                key="news-view"
+                className="view-content"
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: 20 }}
+              >
+                <NewsSection />
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+      </div>
+
+      <AuthModal 
+        isOpen={showAuthModal} 
+        onClose={() => setShowAuthModal(false)} 
+        onSuccess={(u) => {
+          showToast(`Welcome back, ${u.email?.split('@')[0]}`);
+        }}
+      />
+
+
+
+      <AnimatePresence>
+        {toast && (
+          <motion.div className="toast">
+            {toast}
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+};
+
+export default App;
