@@ -1905,7 +1905,7 @@ body {
     background: transparent;
     border: none;
     z-index: 1000;
-    padding: 15px 8px 5px;
+    padding: 15px 5px 5px;
     pointer-events: auto;
   }
 
@@ -1923,7 +1923,7 @@ body {
     flex-direction: row;
     justify-content: flex-start;
     align-items: center;
-    margin-left: 10px;
+    margin-left: 0;
   }
 
   .topbar-switcher {
@@ -3013,7 +3013,7 @@ body {
     backdrop-filter: blur(10px);
     color: var(--text-secondary);
     cursor: pointer;
-    margin-left: 8px;
+    margin-left: 0;
     flex-shrink: 0;
     transition: var(--transition);
   }
