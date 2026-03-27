@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { Trash2, Zap, Paperclip, Mic, ChevronDown, Database, Download, LogIn, LogOut, User as UserIcon, Menu } from 'lucide-react';
+import { Trash2, Zap, Paperclip, Mic, ChevronDown, Database, Download, LogIn, User as UserIcon, Menu } from 'lucide-react';
 import { supabase } from './supabase';
 import AuthModal from './components/AuthModal';
 import type { User } from '@supabase/supabase-js';
@@ -244,31 +244,17 @@ const App: React.FC = () => {
         {/* Top Bar */}
         <div className="topbar">
           <div className="topbar-left">
-            <div className="topbar-mode-badge">
+            {/* Desktop-only badges */}
+            <div className="topbar-mode-badge hide-on-mobile">
               <div className="topbar-mode-dot" style={{ background: currentMode.color }} />
               <DynamicIcon name={currentMode.icon} size={14} color={currentMode.color} style={{ marginRight: '6px' }} />
               <span>{currentMode.label}</span>
             </div>
-            <div className="topbar-model-badge" title={activeModelInfo?.description}>
+            <div className="topbar-model-badge hide-on-mobile" title={activeModelInfo?.description}>
               <Zap size={10} style={{ marginRight: '4px' }} />
               {activeModelInfo?.label}
             </div>
-          </div>
-
-          <div className="mobile-top-auth">
-            {user ? (
-               <button className="mobile-auth-btn" onClick={handleLogout} title="Logout">
-                 <div className="user-avatar-mini">{user.email?.charAt(0).toUpperCase()}</div>
-               </button>
-            ) : (
-               <button className="mobile-auth-btn" onClick={() => setShowAuthModal(true)}>
-                 <LogIn size={18} />
-               </button>
-            )}
-          </div>
-
-          <div className="topbar-switcher-wrapper">
-            {/* Mobile-only: 3-lines button to open agent mode picker */}
+            {/* Mobile-only menu */}
             <button
               className="mobile-mode-menu-btn"
               onClick={() => setShowMobileModePicker(true)}
@@ -277,6 +263,9 @@ const App: React.FC = () => {
             >
               <Menu size={18} />
             </button>
+          </div>
+
+          <div className="topbar-switcher-wrapper">
             <div className="topbar-switcher">
               <button 
                 className={`switcher-btn ${view === 'copilot' ? 'active' : ''}`}
@@ -301,34 +290,25 @@ const App: React.FC = () => {
           </div>
 
           <div className="topbar-right">
+            {/* Consolidate Auth for both desktop and mobile */}
             {user ? (
-              <div className="flex items-center gap-2">
-                <div className="topbar-mode-badge user-badge" title={user.email}>
-                  <UserIcon size={14} />
-                  <span>{user.email?.split('@')[0]}</span>
-                </div>
-                <button 
-                  className="login-btn floating-action" 
-                  onClick={handleLogout}
-                  id="logout-topbar-btn"
-                  title="Logout"
-                >
-                  <LogOut size={14} />
-                </button>
-              </div>
+               <div className="flex items-center gap-2">
+                 <div className="topbar-mode-badge user-badge hide-on-mobile" title={user.email}>
+                   <UserIcon size={14} />
+                   <span>{user.email?.split('@')[0]}</span>
+                 </div>
+                 <button className="mobile-auth-btn" onClick={handleLogout} title="Logout">
+                   <div className="user-avatar-mini">{user.email?.charAt(0).toUpperCase()}</div>
+                 </button>
+               </div>
             ) : (
-              <button 
-                className="login-btn floating-action" 
-                onClick={() => setShowAuthModal(true)}
-                id="login-topbar-btn"
-              >
-                <LogIn size={14} />
-                <span>Login</span>
-              </button>
+               <button className="mobile-auth-btn" onClick={() => setShowAuthModal(true)} title="Login">
+                 <LogIn size={18} />
+               </button>
             )}
 
             <button 
-              className="clear-btn" 
+              className="clear-btn hide-on-mobile" 
               onClick={clearChat} 
               id="clear-chat-btn" 
               disabled={messages.length === 0}
@@ -336,10 +316,10 @@ const App: React.FC = () => {
               <Trash2 size={14} />
               <span>Clear</span>
             </button>
-
+            
             {installPrompt && (
               <button 
-                className="clear-btn pwa-badge" 
+                className="clear-btn pwa-badge hide-on-mobile" 
                 onClick={handleInstall} 
                 id="pwa-install-topbar-btn"
                 style={{ 

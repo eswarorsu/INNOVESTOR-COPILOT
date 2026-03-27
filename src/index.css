@@ -1899,31 +1899,37 @@ body {
     top: 0;
     left: 0;
     right: 0;
-    display: flex;
+    display: grid !important;
+    grid-template-columns: 1fr auto 1fr;
     align-items: center;
-    justify-content: flex-start;
+    justify-items: center;
     background: transparent;
     border: none;
     z-index: 1000;
-    padding: 15px 5px 5px;
+    padding: 10px 12px;
     pointer-events: auto;
+    gap: 0;
+  }
+  
+  .topbar-left {
+    display: flex !important;
+    justify-content: flex-start;
+    width: 100%;
   }
 
-  .topbar-left,
   .topbar-right {
-    display: none !important;
+    display: flex !important;
+    justify-content: flex-end;
+    width: 100%;
   }
 
   .topbar-switcher-wrapper {
     pointer-events: auto;
-    width: 100%;
-    border-radius: 99px;
-    padding: 0;
+    width: auto !important;
     display: flex;
-    flex-direction: row;
-    justify-content: flex-start;
+    justify-content: center;
     align-items: center;
-    margin-left: 0;
+    margin: 0;
   }
 
   .topbar-switcher {
